@@ -1,0 +1,27 @@
+---
+- name: Get package facts
+  package_facts:
+
+- name: Add exception to the firewall
+  when: "'firewalld' in ansible_facts.packages"
+  block:
+    - name: Set ports
+      become: true
+      ansible.posix.firewalld:
+        port: "{{ zj_rule_details }}"
+        permanent: "{{ firewalld_rules_permament }}"
+        state: enabled
+      loop:
+        - 80/tcp
+        - 443/tcp
+        - 5353/udp
+      loop_control:
+        loop_var: zj_rule_details
+
+    - name: Add exception to source
+      become: true
+      ansible.posix.firewalld:
+        source: 10.42.0.0/16
+        zone: trusted
+        permanent: "{{ firewalld_rules_permament }}"
+        state: enabled

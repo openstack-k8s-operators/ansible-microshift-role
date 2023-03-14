@@ -1,0 +1,14 @@
+---
+- name: Restart crio
+  become: true
+  ansible.builtin.systemd:
+    name: crio
+    state: restarted
+    enabled: true
+
+- name: Restart Microshift
+  become: true
+  ansible.builtin.systemd:
+    name: microshift
+    state: started
+    enabled: true

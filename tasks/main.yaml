@@ -1,0 +1,52 @@
+---
+- name: Check if pull-secret is provided when copr version is disabled
+  ansible.builtin.fail:
+    msg: "You need to provide pull-secret.txt content into the var!"
+  when: not openshift_pull_secret and not use_copr_microshift
+
+- name: Disable selinux
+  ansible.builtin.include_tasks: selinux.yaml
+  when: disable_selinux
+
+- name: Setup Microshift repository
+  ansible.builtin.include_tasks: repo.yaml
+
+- name: Prepare host
+  ansible.builtin.include_tasks: pre.yaml
+
+- name: Disable swap
+  ansible.builtin.include_tasks: swap.yaml
+  when: disable_swap
+
+- name: Setup tools
+  ansible.builtin.include_tasks: tools.yaml
+  when: setup_tools
+
+- name: Prepare cri-o
+  ansible.builtin.include_tasks: crio.yaml
+
+- name: Prepare firewall
+  ansible.builtin.include_tasks: firewall.yaml
+
+- name: Setup Microshift
+  ansible.builtin.include_tasks: microshift.yaml
+
+- name: Provide credentials for restricted regitries
+  ansible.builtin.include_tasks: registry_login.yaml
+  when: not use_copr_microshift
+
+- name: Setup OLM
+  ansible.builtin.include_tasks: olm.yaml
+  when: setup_olm
+
+- name: Create persistent volume
+  ansible.builtin.include_tasks: pv.yaml
+  when: create_pv
+
+- name: Create standard-user and playground namespace
+  ansible.builtin.include_tasks: standard-user.yaml
+  when: standard_user
+
+- name: Delete openshift storage
+  ansible.builtin.include_tasks: openshift-storage.yaml
+  when: delete_openshift_storage

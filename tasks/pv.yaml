@@ -1,0 +1,63 @@
+---
+- name: Remove storage config if present
+  become: true
+  ansible.builtin.file:
+    path: ~{{ ansible_user }}/storage.yaml
+    state: absent
+
+- name: Ensure that main PV path directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ pv_host_path }}"
+    state: directory
+    recurse: true
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    setype: container_file_t
+    selevel: s0
+
+- name: Create PV directories
+  become: true
+  ansible.builtin.file:
+    path: "{{ pv_host_path }}/pv00{{ zj_pv_number }}"
+    state: directory
+    mode: "0777"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    setype: container_file_t
+    selevel: s0
+  with_sequence: start="{{ pv_count.start }}" end="{{ pv_count.end }}"
+  loop_control:
+    loop_var: zj_pv_number
+
+# FROM: https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage
+# It also base on https://github.com/openstack-k8s-operators/install_yamls/blob/master/scripts/gen-crc-pv-kustomize.sh
+- name: Create local-storage storage class manifest
+  ansible.builtin.copy:
+    content: |
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: "{{ pv_storageclass }}"
+      provisioner: kubernetes.io/no-provisioner
+      volumeBindingMode: WaitForFirstConsumer
+    dest: "~{{ ansible_user }}/storage-class.yaml"
+
+- name: Apply storage class manifest
+  ansible.builtin.command: oc apply -f "~{{ ansible_user }}/storage-class.yaml"
+
+- name: Get worker nodes
+  ansible.builtin.shell: |
+    oc get node -o name -l node-role.kubernetes.io/worker | sed -e 's|node/||' | head -c-1 | tr '\n' ','
+  tags:
+    - skip_ansible_lint
+  register: _worker_nodes
+
+- name: Add PV
+  ansible.builtin.template:
+    src: pv.yaml
+    dest: "~{{ ansible_user }}/storage.yaml"
+    mode: "0644"
+
+- name: Run PV manifest
+  ansible.builtin.command: oc apply -f ~{{ ansible_user }}/storage.yaml

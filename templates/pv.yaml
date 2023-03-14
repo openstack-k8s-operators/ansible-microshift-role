@@ -1,0 +1,29 @@
+{% for zj_pv_number in range(pv_count.start, pv_count.end) %}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ pv_storageclass }}00{{ zj_pv_number }}"
+  labels:
+    type: local
+spec:
+  storageClassName: "{{ pv_storageclass }}"
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Delete
+  local:
+    path: "{{ pv_host_path }}/pv00{{ zj_pv_number }}"
+    type: DirectoryOrCreate
+  volumeMode: Filesystem
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values: {{ _worker_nodes.stdout | split }}
+{% endfor %}
