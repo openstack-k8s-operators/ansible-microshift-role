@@ -1,0 +1,7 @@
+---
+- name: Unpack the tar
+  become: true
+  ansible.builtin.unarchive:
+    src: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz
+    dest: /usr/bin
+    remote_src: true
