@@ -10,9 +10,7 @@ Example deployment
 
 ```sh
 sudo dnf install -y ansible-core git
-ansible-galaxy collection install community.general
-ansible-galaxy collection install community.crypto
-ansible-galaxy collection install ansible.posix
+ansible-galaxy collection install community.general community.crypto ansible.posix
 ```
 
 * Clone Microshift Ansible role project
