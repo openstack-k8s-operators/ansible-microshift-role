@@ -1,18 +1,50 @@
-Deploy Microshift service
-=========================
+# Ansible Microshift Role
 
-This role deploys Microshift service on RHEL 8/9.
+## Overview and scope
 
-Example deployment
-------------------
+The main goal of that project is to deploy the Microshift service by using
+Ansible tool.
 
-* Install Ansible:
+On top of the MicroShift [getting started](https://microshift.io/docs/getting-started/) instructions,
+this role performs the following actions:
+
+* Disable IPv6 as it is a source of problem in cloud environment.
+* Give you possibility to disable the swap on the host.
+* Can install the Operator SDK framework.
+* Create the PV (Persistent Volumes) base on local storage.
+* Setup topolvm storage for persistent volume.
+* Create an additional user in OpenShift.
+* Overwrite the container policy.
+* Others.
+
+## Role requirements
+
+To run MicroShift, the minimum system requirements [are](https://github.com/openshift/microshift#system-requirements):
+
+* x86_64 or aarch64 CPU architecture
+* Red Hat Enterprise Linux 9 with Extended Update Support (9.2 or later)
+* 2 CPU cores
+* 2GB of RAM
+* 2GB of free system root storage for MicroShift and its container images
+
+Besides system requirements, it is necessary to provide a `pull-secret.txt`
+content, which can be generated [here](https://console.redhat.com/openshift/create/local>).
+and it is configured to your user account.
+The pull-secret.txt content should be provided as a ansible variable: `openshift_pull_secret`.
+
+## Role Variables
+
+All of the parameters to setup the Ansible role are available in the [defaults](https://github.com/openstack-k8s-operators/ansible-microshift-role/blob/master/defaults/main.yaml) file.
+
+## Usage
+
+Example deployment:
+
+* Install Ansible
 
 ```sh
 sudo dnf install -y ansible-core git
-ansible-galaxy collection install community.general
-ansible-galaxy collection install community.crypto
-ansible-galaxy collection install ansible.posix
+ansible-galaxy collection install community.general community.crypto ansible.posix
 ```
 
 * Clone Microshift Ansible role project
@@ -74,3 +106,23 @@ EOF
 ```sh
 ansible-playbook -i inventory.yaml deploy-microshift.yaml
 ```
+
+## Contributing
+
+We welcome contributions to this project! Here's how you can get started:
+
+* Fork this repository.
+* Clone your forked repository to your local machine.
+* Make changes to the code or documentation.
+* Test your changes thoroughly.
+* Commit your changes and push them to your forked repository.
+* Create a pull request to the main branch of this repository.
+
+The project mainteners would get a notification about your change and
+you can expect, that soon your change would be reviewed!
+
+If you don't want to create a pull request with a feature, you can allways
+create an issue and describe the missing functionality. The project community
+would reply you soon!
+
+Thank you for considering contributing to this project!

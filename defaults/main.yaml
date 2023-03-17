@@ -1,40 +1,121 @@
 ---
+#######################################
+###       Basic configuration       ###
+#######################################
+
+# Set the Fully Qualified Domain Name of a Microshift host
 fqdn: microshift.dev
+
 # NOTE: To deploy Microshift > 4.8, you should provide pull-secret.txt content.
 # It can be generated here: https://cloud.redhat.com/openshift/create/local
 openshift_pull_secret: ""
+
+# Set the location, where the pull-secret.txt content will be stored,
+# Later it will be used by cri-o runtime environment.
 registry_secret_path: /etc/crio/openshift-pull-secret
+
+# Option allows to disable SELinux.
 disable_selinux: false
+
+# Hide logs when Ansible is executed.
 hide_sensitive_logs: true
+
+# Download and copy required binaries to setup Microshift.
+# For example `oc` binary.
 setup_tools: true
+
+# Disable the swap in the system. This option is not required by the Microshift,
+# but it is recommended by the Kubernetes deployment.
+# More info: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 disable_swap: true
+
+# Keep the firewalld rules after reboot
 firewalld_rules_permament: true
 
+### Microshift ###
+
+# That option is installing Microshift 4.8 release, which does not require a
+# pull-secret.txt file.
 use_copr_microshift: false
+
+# The Microshift version that is available in the repository.
 microshift_version: 4.12
 
+#######################################
+###              OLM                ###
+#######################################
+
+# Install the OLM - https://olm.operatorframework.io/
 setup_olm: false
+
+# Location where the additional projects should be keeped.
+# For example, if `setup_olm` is enabled, it will use Git to clone project
+# to that directory.
 repo_dir: "~{{ ansible_user }}/repos"
+
+# Version of the Operator SDK
 operator_sdk_version: "v1.21.0"
+
+# The URL path where the Operator SDK is located
 operator_sdk_url: "https://github.com/operator-framework/operator-sdk"
 
+#######################################
+### Persistent volume configuration ###
+#######################################
+
+# Create PV (Persistent Volumes) that are configured on host local storage.
 create_pv: true
+
+# Name of the storageclass used to create PV.
 pv_storageclass: local-storage
+
+# Path on the host, where the PV data is stored.
 pv_host_path: "/mnt/data"
+
+# Counter how many PV should be created.
+# NOTE: It also creates separate directories in `pv_host_path`.
 pv_count:
   start: 1
   end: 15
 
-# This defines a Subject (by creating a client cert), a Namespace and a RoleBinding using role.
+#######################################
+###        Openshift Storage        ###
+#######################################
+#
+# Set to true if the openshift-storage should be deleted.
+# NOTE: After restart the Microshift service, the openshift-storage will be
+# recreated. In that case, it is recommended to set the value to false and
+# it will create a LVM base on loopback file disk.
+delete_openshift_storage: false
+
+# Set the path for a file, where later Ansible would create a LVM partition.
+# It would be needed when `delete_openshift_storage` is set to false.
+disk_file_path: /mnt/microshift-storage-file
+
+# Size of the partition, that would be used by openshift-storage.
+# It would be needed when `delete_openshift_storage` is set to false.
+disk_file_size: 20G
+
+# Name of the volume group used by the openshift-storage to deploy topolvm.
+# Default value for Microshift is `rhel`.
+vg_name: rhel
+
+########################
+### Additional users ###
+########################
+
+# Location where the user certificates should be keeped.
 certs_dir: "~{{ ansible_user }}/.certs"
+
+# Create a new user inside the Microshift cluster.
 standard_user:
   name: dev-admin
   namespace: dev-admin
   role: admin
 
-delete_openshift_storage: false
-disk_file_path: /mnt/microshift-storage-file
-disk_file_size: 20G
-vg_name: rhel
+#######################################
+###              Others             ###
+#######################################
 
+# Set the cri-o registry policy to pull images even from untrasted registries.
 overwrite_container_policy: false
