@@ -47,6 +47,5 @@
   ansible.builtin.include_tasks: standard-user.yaml
   when: standard_user
 
-- name: Delete openshift storage
+- name: Create lvm or delete openshift storage
   ansible.builtin.include_tasks: openshift-storage.yaml
-  when: delete_openshift_storage

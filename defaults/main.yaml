@@ -32,5 +32,9 @@ standard_user:
   namespace: dev-admin
   role: admin
 
-delete_openshift_storage: true
+delete_openshift_storage: false
+disk_file_path: /mnt/microshift-storage-file
+disk_file_size: 20G
+vg_name: rhel
+
 overwrite_container_policy: false
