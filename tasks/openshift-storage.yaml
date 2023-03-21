@@ -1,15 +1,69 @@
 ---
-# NOTE: The Openshift storage uses topolvm, that requires additional volume,
-# which is not necessary for us, due we mostly use that playbook for CI.
-- name: Check if openshift-storage namespace exists
-  ansible.builtin.command: oc get namespace openshift-storage
-  register: _openshift_storage_ns
-  failed_when: _openshift_storage_ns.rc not in [0, 1]
+- name: Delete openshift-storage if needed
+  when: delete_openshift_storage
+  block:
+    # NOTE: The Openshift storage uses topolvm, that requires additional volume,
+    # which is not necessary for us, due we mostly use that playbook for CI.
+    - name: Check if openshift-storage namespace exists
+      ansible.builtin.command: oc get namespace openshift-storage
+      register: _openshift_storage_ns
+      failed_when: _openshift_storage_ns.rc not in [0, 1]
 
-- name: Delete openshift storage namespace
-  ansible.builtin.command: oc delete namespace openshift-storage
-  when: _openshift_storage_ns.rc == 0
+    - name: Delete openshift storage namespace
+      ansible.builtin.command: oc delete namespace openshift-storage
+      when: _openshift_storage_ns.rc == 0
 
-- name: Delete topolvm-provisioner storageclass
-  ansible.builtin.command: oc delete storageclass topolvm-provisioner
-  when: _openshift_storage_ns.rc == 0
+    - name: Delete topolvm-provisioner storageclass
+      ansible.builtin.command: oc delete storageclass topolvm-provisioner
+      when: _openshift_storage_ns.rc == 0
+
+- name: Create LVM on loop device to deploy openshift storage with topolvm
+  when: not delete_openshift_storage
+  block:
+    - name: Check if file already exists
+      become: true
+      stat:
+        path: "{{ disk_file_path }}"
+      register: _disk_file
+
+    - name: Create loop disk
+      when: not _disk_file.stat.exists
+      block:
+        - name: Create empty file
+          become: true
+          community.general.filesize:
+            path: "{{ disk_file_path }}"
+            size: "{{ disk_file_size }}"
+
+        - name: Make partition on empty file
+          become: true
+          community.general.parted:
+            device: "{{ disk_file_path }}"
+            number: 1
+            state: present
+            flags: ["lvm"]
+
+        - name: Get first available loop device
+          become: true
+          ansible.builtin.command: losetup -f
+          register: loop_device
+
+        - name: Create loop device service
+          become: true
+          ansible.builtin.template:
+            src: microshift-loop-device.service.j2
+            dest: /usr/lib/systemd/system/microshift-loop-device.service
+
+        - name: Enable loop device service
+          become: true
+          ansible.builtin.systemd:
+            name: microshift-loop-device
+            state: started
+            enabled: true
+            daemon_reload: true
+
+        - name: Create volume group
+          become: true
+          community.general.lvg:
+            vg: "{{ vg_name }}"
+            pvs: "{{ loop_device.stdout }}"

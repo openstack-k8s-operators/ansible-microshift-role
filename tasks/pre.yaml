@@ -12,6 +12,7 @@
       - git
       - golang
       - python3-cryptography
+      - lvm2
     state: present
 
 - name: Add host to the hosts file
