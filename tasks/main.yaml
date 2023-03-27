@@ -49,3 +49,7 @@
 
 - name: Create lvm or delete openshift storage
   ansible.builtin.include_tasks: openshift-storage.yaml
+
+- name: Configure DNSMasq
+  ansible.builtin.include_tasks: dnsmasq.yaml
+  when: configure_dnsmasq
