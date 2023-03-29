@@ -96,6 +96,9 @@ disk_file_path: /mnt/microshift-storage-file
 # It would be needed when `delete_openshift_storage` is set to false.
 disk_file_size: 20G
 
+# Whether or not to create a sparse file
+disk_file_sparsed: false
+
 # Name of the volume group used by the openshift-storage to deploy topolvm.
 # Default value for Microshift is `rhel`.
 vg_name: rhel
