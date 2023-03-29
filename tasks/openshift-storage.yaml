@@ -34,7 +34,6 @@
           community.general.filesize:
             path: "{{ disk_file_path }}"
             size: "{{ disk_file_size }}"
-            sparse: true
 
         - name: Make partition on empty file
           become: true
