@@ -39,7 +39,7 @@ firewalld_rules_permament: true
 use_copr_microshift: false
 
 # The Microshift version that is available in the repository.
-microshift_version: 4.12
+microshift_version: 4.13
 
 #######################################
 ###              OLM                ###
