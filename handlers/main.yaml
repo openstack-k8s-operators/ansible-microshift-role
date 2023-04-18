@@ -1,4 +1,18 @@
 ---
+- name: Restart DNSMasq service
+  become: true
+  ansible.builtin.systemd:
+    name: dnsmasq
+    state: restarted
+    enabled: true
+
+- name: Reload NetworkManager
+  become: true
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: reloaded
+    enabled: true
+
 - name: Restart crio
   become: true
   ansible.builtin.systemd:
