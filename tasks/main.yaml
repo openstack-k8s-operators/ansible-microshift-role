@@ -28,6 +28,10 @@
 - name: Prepare firewall
   ansible.builtin.include_tasks: firewall.yaml
 
+- name: Prepare DNSMasq
+  ansible.builtin.include_tasks: pre-dnsmasq.yaml
+  when: configure_dnsmasq
+
 - name: Setup Microshift
   ansible.builtin.include_tasks: microshift.yaml
 
@@ -35,21 +39,21 @@
   ansible.builtin.include_tasks: registry_login.yaml
   when: not use_copr_microshift
 
-- name: Setup OLM
-  ansible.builtin.include_tasks: olm.yaml
-  when: setup_olm
-
 - name: Create persistent volume
   ansible.builtin.include_tasks: pv.yaml
   when: create_pv
+
+- name: Create lvm or delete openshift storage
+  ansible.builtin.include_tasks: openshift-storage.yaml
 
 - name: Create standard-user and playground namespace
   ansible.builtin.include_tasks: standard-user.yaml
   when: standard_user
 
-- name: Create lvm or delete openshift storage
-  ansible.builtin.include_tasks: openshift-storage.yaml
-
 - name: Configure DNSMasq
   ansible.builtin.include_tasks: dnsmasq.yaml
   when: configure_dnsmasq
+
+- name: Setup OLM
+  ansible.builtin.include_tasks: olm.yaml
+  when: setup_olm

@@ -131,8 +131,7 @@ microshift_frontend_address: ""
 # Additional addresses that should be resolved by the DNSMasq and redirected
 # to microshift_frontend_address (if configure). Otherwise redirect to
 # loadbalancer or Openshift router.
-microshift_additional_addresses:
-  - "{{ fqdn }}"
+microshift_additional_addresses: []
 # Set the cloud provider DNS IP addresses. Replace below DNS servers with your
 # Cloud provider DNS addresses.
 cloudprovider_dns:
