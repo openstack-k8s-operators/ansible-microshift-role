@@ -28,10 +28,6 @@
 - name: Prepare firewall
   ansible.builtin.include_tasks: firewall.yaml
 
-- name: Prepare DNSMasq
-  ansible.builtin.include_tasks: pre-dnsmasq.yaml
-  when: configure_dnsmasq
-
 - name: Setup Microshift
   ansible.builtin.include_tasks: microshift.yaml
 
