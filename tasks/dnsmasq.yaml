@@ -1,4 +1,31 @@
 ---
+# NOTE(dpawlik): There are some improvements done in Microshift 4.13 related
+# to the systemd-resolved service, but after a test, for dnsmasq and Microshift 4.12,
+# it is better when the dnsmasq service is deployed after the Microshift pods are
+# running.
+- name: Install DNSMasq
+  become: true
+  ansible.builtin.package:
+    name: dnsmasq
+    state: present
+
+- name: Change DNSMasq configuration
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/dnsmasq.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  loop:
+    - regexp: "^#server=/3.168.192.in-addr.arpa/10.1.2.3"
+      line: "server={{ cloudprovider_dns | default(public_dns) | random }}"
+    - regexp: '^# server=10.1.2.3@eth1'
+      line: "server={{ public_dns | random}}"
+    - regexp: "^interface=lo"
+      line: "#interface=lo"
+    - regexp: "^#address=\/double-click.net\/127.0.0.1"
+      line: "address=/{{ fqdn }}/127.0.0.1"
+  notify: Restart DNSMasq service
+
 - name: Get the LoadBalander ip address or Openshift Router ip address
   when: not microshift_frontend_address
   block:
@@ -22,7 +49,6 @@
       ansible.builtin.set_fact:
         microshift_frontend_address: "{{ _lb_ip.stdout }}"
 
-# NOTE: Add Openstack k8s domains
 - name: Add new addresses to bind to the ingress
   become: true
   ansible.builtin.lineinfile:
@@ -31,3 +57,20 @@
   loop: "{{ microshift_additional_addresses }}"
   when: microshift_frontend_address
   notify: Restart DNSMasq service
+
+- name: Change resolv.conf
+  become: true
+  ansible.builtin.copy:
+    content: |
+      # NOTE: The nameserver ip addresses are set in /etc/dnsmasq.conf
+      nameserver 127.0.0.1
+    dest: /etc/resolv.conf
+
+- name: Add dnsmasq rule for NetworkManager
+  become: true
+  ansible.builtin.copy:
+    content: |
+      [main]
+      dns=dnsmasq
+    dest: /etc/NetworkManager/conf.d/00-microshift-use-dnsmasq.conf
+  notify: Reload NetworkManager
