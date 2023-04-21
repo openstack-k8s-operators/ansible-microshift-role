@@ -1,26 +1,28 @@
----
-- name: Clone OLM operator-sdk
-  ansible.builtin.git:
-    repo: "{{ operator_sdk_url }}"
-    dest: "{{ repo_dir }}/operator-sdk"
-    version: "{{ operator_sdk_version }}"
+- name: Ensure installation directory
+  file:
+    path: "{{ repo_dir }}"
+    state: directory
 
-- name: Build Operator SDK
-  community.general.make:
-    target: build
-    chdir: "{{ repo_dir }}/operator-sdk"
+- name: Fetch operator-sdk
+  ansible.builtin.uri:
+    url: https://github.com/operator-framework/operator-sdk/releases/download/{{ operator_sdk_version }}/operator-sdk_linux_amd64
+    dest: "{{ repo_dir }}/operator-sdk"
+    mode: "755"
+    status_code:
+      - 200
+      - 304
 
 - name: Check if OLM is installed
-  ansible.builtin.shell: |
-    build/operator-sdk olm status
+  ansible.builtin.command:
+    "{{ repo_dir }}/operator-sdk olm status"
   register: olm_status
-  args:
-    chdir: "{{ repo_dir }}/operator-sdk"
   failed_when: olm_status.rc not in [0, 1]
 
 - name: Install OLM with SDK
-  ansible.builtin.shell: |
-    build/operator-sdk olm install
-  args:
-    chdir: "{{ repo_dir }}/operator-sdk"
+  ansible.builtin.command:
+    "{{ repo_dir }}/operator-sdk olm install --version {{ olm_version }}"
   when: olm_status.rc != 0
+
+- name: Ensure privileged SCC for OLM
+  ansible.builtin.command:
+    oc adm policy add-scc-to-user privileged system:serviceaccount:olm:default
