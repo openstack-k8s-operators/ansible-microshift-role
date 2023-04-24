@@ -74,3 +74,6 @@
       dns=dnsmasq
     dest: /etc/NetworkManager/conf.d/00-microshift-use-dnsmasq.conf
   notify: Reload NetworkManager
+
+- name: Flush handlers
+  meta: flush_handlers
