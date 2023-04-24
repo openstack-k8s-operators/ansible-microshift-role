@@ -47,6 +47,7 @@ microshift_version: 4.13
 
 # Install the OLM - https://olm.operatorframework.io/
 setup_olm: false
+olm_version: "v0.24.0"
 
 # Location where the additional projects should be keeped.
 # For example, if `setup_olm` is enabled, it will use Git to clone project
@@ -54,10 +55,7 @@ setup_olm: false
 repo_dir: "~{{ ansible_user }}/repos"
 
 # Version of the Operator SDK
-operator_sdk_version: "v1.21.0"
-
-# The URL path where the Operator SDK is located
-operator_sdk_url: "https://github.com/operator-framework/operator-sdk"
+operator_sdk_version: "v1.28.0"
 
 #######################################
 ### Persistent volume configuration ###
