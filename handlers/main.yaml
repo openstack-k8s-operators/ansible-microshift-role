@@ -1,10 +1,10 @@
 ---
-- name: Restart DNSMasq service
+- name: Disable dnsmasq service
   become: true
   ansible.builtin.systemd:
     name: dnsmasq
-    state: restarted
-    enabled: true
+    state: stopped
+    enabled: false
 
 - name: Reload NetworkManager
   become: true

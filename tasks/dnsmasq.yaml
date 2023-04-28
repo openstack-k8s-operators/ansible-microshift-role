@@ -8,11 +8,31 @@
   ansible.builtin.package:
     name: dnsmasq
     state: present
+  notify: Disable dnsmasq service
 
-- name: Change DNSMasq configuration
+# NOTE: The dnsmasq can be stopped, because the NetworkManager would spawn
+# own instance of it and will respect its config.
+- name: Copy dnsmasq configuration file to NetworkManager dir
+  become: true
+  ansible.builtin.copy:
+    src: /etc/dnsmasq.conf
+    dest: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
+    remote_src: true
+  notify:
+    - Disable dnsmasq service
+    - Reload NetworkManager
+
+- name: Add information about new dnsmasq configuration file location
   become: true
   ansible.builtin.lineinfile:
     path: /etc/dnsmasq.conf
+    insertbefore: '^# Configuration file for dnsmasq.'
+    line: "\n\n# ANSIBLE: This file is now managed by NetworkManager - /etc/NetworkManager/dnsmasq.d/dnsmasq.conf\n\n"
+
+- name: Change DNSMasq configuration file in NetworkManager
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
   loop:
@@ -24,7 +44,6 @@
       line: "#interface=lo"
     - regexp: "^#address=\/double-click.net\/127.0.0.1"
       line: "address=/{{ fqdn }}/127.0.0.1"
-  notify: Restart DNSMasq service
 
 - name: Get the LoadBalander ip address or Openshift Router ip address
   when: not microshift_frontend_address
@@ -52,19 +71,10 @@
 - name: Add new addresses to bind to the ingress
   become: true
   ansible.builtin.lineinfile:
-    path: /etc/dnsmasq.conf
+    path: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
     line: "address=/{{ item }}/{{ microshift_frontend_address }}"
   loop: "{{ microshift_additional_addresses }}"
   when: microshift_frontend_address
-  notify: Restart DNSMasq service
-
-- name: Change resolv.conf
-  become: true
-  ansible.builtin.copy:
-    content: |
-      # NOTE: The nameserver ip addresses are set in /etc/dnsmasq.conf
-      nameserver 127.0.0.1
-    dest: /etc/resolv.conf
 
 - name: Add dnsmasq rule for NetworkManager
   become: true
@@ -73,7 +83,9 @@
       [main]
       dns=dnsmasq
     dest: /etc/NetworkManager/conf.d/00-microshift-use-dnsmasq.conf
-  notify: Reload NetworkManager
+  notify:
+    - Disable dnsmasq service
+    - Reload NetworkManager
 
 - name: Flush handlers
   meta: flush_handlers
