@@ -37,7 +37,7 @@
       ## \n\n# ANSIBLE: This file was commented by Ansible to enable dnsmasq functionality \n\n
       #[main]
       #dns = none
-    path: /etc/NetworkManager/conf.d/99-cloud-init.conf
+    dest: /etc/NetworkManager/conf.d/99-cloud-init.conf
 
 - name: Add information about new dnsmasq configuration file location
   become: true
