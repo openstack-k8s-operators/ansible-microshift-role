@@ -34,7 +34,9 @@
   copy:
     content: |
       ## Created by cloud-init on instance boot automatically, do not edit.
-      ## \n\n# ANSIBLE: This file was commented by Ansible to enable dnsmasq functionality \n\n
+      #
+      ## ANSIBLE: This file was commented by Ansible to enable dnsmasq functionality
+      #
       #[main]
       #dns = none
     dest: /etc/NetworkManager/conf.d/99-cloud-init.conf
@@ -61,6 +63,8 @@
       line: "#interface=lo"
     - regexp: "^#address=\/double-click.net\/127.0.0.1"
       line: "address=/{{ fqdn }}/127.0.0.1"
+    - regexp: "^#listen-address="
+      line: "listen-address={{ ansible_default_ipv4.address }}"
 
 - name: Get the LoadBalander ip address or Openshift Router ip address
   when: not microshift_frontend_address
