@@ -2,9 +2,12 @@
 Description=Setup loopback device
 DefaultDependencies=no
 Conflicts=umount.target
-Before=local-fs.target umount.target microshift.service
+ConditionPathExists={{ disk_file_path }}
+Before=microshift.service
+After=systemd-udevd.service
 
 [Service]
+ExecStartPre=/sbin/modprobe loop
 ExecStart=/sbin/losetup {{ loop_device.stdout }} {{ disk_file_path }}
 ExecStop=/sbin/losetup -d {{ loop_device.stdout }}
 Type=oneshot
@@ -12,5 +15,5 @@ TimeoutSec=60
 RemainAfterExit=yes
 
 [Install]
-WantedBy=local-fs-pre.target
+WantedBy=local-fs.target
 Also=systemd-udevd.service
