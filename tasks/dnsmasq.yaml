@@ -22,6 +22,23 @@
     - Disable dnsmasq service
     - Reload NetworkManager
 
+- name: Check if 99-cloud-init.conf exists
+  become: true
+  stat:
+    path: /etc/NetworkManager/conf.d/99-cloud-init.conf
+  register: _cloud_init_conf
+
+- name: Comment 99-cloud-init.conf file
+  become: true
+  when: _cloud_init_conf.stat.exists
+  copy:
+    content: |
+      ## Created by cloud-init on instance boot automatically, do not edit.
+      ## \n\n# ANSIBLE: This file was commented by Ansible to enable dnsmasq functionality \n\n
+      #[main]
+      #dns = none
+    path: /etc/NetworkManager/conf.d/99-cloud-init.conf
+
 - name: Add information about new dnsmasq configuration file location
   become: true
   ansible.builtin.lineinfile:
