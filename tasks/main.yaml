@@ -53,6 +53,9 @@
   ansible.builtin.include_tasks: dnsmasq.yaml
   when: configure_dnsmasq
 
+- name: Configure additional domains
+  ansible.builtin.include_tasks: coredns.yaml
+
 - name: Setup OLM
   ansible.builtin.include_tasks: olm.yaml
   when: setup_olm
