@@ -49,6 +49,13 @@
           ansible.builtin.command: losetup -f
           register: loop_device
 
+        - name: Create script to start lvm volumes after reboot
+          become: true
+          copy:
+            src: start-lvm.sh
+            dest: /usr/local/bin/start-lvm.sh
+            mode: "0755"
+
         - name: Create loop device service
           become: true
           ansible.builtin.template:
