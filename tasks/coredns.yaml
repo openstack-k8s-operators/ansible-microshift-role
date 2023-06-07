@@ -1,0 +1,77 @@
+---
+# NOTE: We are adding "forward" parameter in the coredns that is
+# resolving DNS queries in dnsmasq that is running to the host.
+# With such way, we are able to resolve the service public hostname in the pod,
+# so it would be helpful in the CI to simulate deployment in the public
+# OpenShift, where some services are not running directly on that cluster.
+- name: Create dnsmasq modification dir
+  become: true
+  ansible.builtin.file:
+    path: "{{ coredns_config_dir }}"
+    state: directory
+
+- name: Check if DNS backup already exists
+  become: true
+  ansible.builtin.stat:
+    path: /etc/microshift/dns-configmap-default.yaml
+  register: _back_dns_configmap
+
+- name: Make backup of current DNS configmap
+  when: not _back_dns_configmap.stat.exists
+  block:
+    - name: Create dns configmap backup
+      become: true
+      ansible.builtin.shell: |
+        oc --kubeconfig ~{{ ansible_user }}/.kube/config -n openshift-dns get configmap dns-default -o yaml > {{ coredns_config_dir }}/dns-configmap-default.yaml
+
+    - name: Copy the dns-configmap.yaml to safe location
+      become: true
+      ansible.builtin.copy:
+        src: "{{ coredns_config_dir }}/dns-configmap-default.yaml"
+        dest: "/etc/microshift/dns-configmap-default.yaml"
+        mode: "0644"
+        remote_src: true
+
+# To get current core DNS configuration just type:
+# oc -n openshift-dns get configmap dns-default  -o go-template --template '{{.data.Corefile}}'
+- name: Add new domains
+  block:
+    - name: Check if yq already exists
+      ansible.builtin.stat:
+        path: /usr/local/bin/yq
+      register: _yq_bin
+
+    - name: Get yq tool
+      become: true
+      ansible.builtin.get_url:
+        url: https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        dest: /usr/local/bin/yq
+        mode: "0755"
+      when: not _yq_bin.stat.exists
+
+    - name: Create new Corefile
+      become: true
+      ansible.builtin.template:
+        src: "corefile.yaml"
+        dest: "{{ coredns_config_dir }}/corefile.yaml"
+      notify: Restart Openshift DNS
+
+    - name: Dump corefile.yaml into raw content
+      become: true
+      ansible.builtin.shell: |
+        cat {{ coredns_config_dir }}/corefile.yaml | xargs -d $'\n' printf '%s\\n' > {{ coredns_config_dir }}/corefile.raw
+
+    - name: Patch configmap with new content
+      become: true
+      ansible.builtin.shell: |
+        /usr/local/bin/yq ".data.Corefile = \"$(cat {{ coredns_config_dir }}/corefile.raw)\"" /etc/microshift/dns-configmap-default.yaml > {{ coredns_config_dir }}/patched-corefile.yaml
+
+    - name: Remove keys that will block coredns configmap update
+      become: true
+      ansible.builtin.shell: |
+        sed -i '/  creationTimestamp:\|  resourceVersion:\|  uid:/d' {{ coredns_config_dir }}/patched-corefile.yaml
+
+    - name: Apply new coredns configmap
+      ansible.builtin.shell: |
+        kubectl apply -f {{ coredns_config_dir }}/patched-corefile.yaml
+      notify: Restart Openshift DNS

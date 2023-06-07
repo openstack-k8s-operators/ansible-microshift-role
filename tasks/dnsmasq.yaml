@@ -101,6 +101,7 @@
   become: true
   ansible.builtin.copy:
     content: |
+      # MANAGED BY ANSIBLE
       [main]
       dns=dnsmasq
     dest: /etc/NetworkManager/conf.d/00-microshift-use-dnsmasq.conf
