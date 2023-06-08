@@ -5,9 +5,11 @@
   ansible.builtin.template:
     src: microshift-deps.repo.j2
     dest: /etc/yum.repos.d/microshift-deps.repo
+    mode: "0644"
 
 - name: Setup repository - Microshift
   become: true
   ansible.builtin.template:
     src: microshift.repo.j2
     dest: /etc/yum.repos.d/microshift.repo
+    mode: "0644"

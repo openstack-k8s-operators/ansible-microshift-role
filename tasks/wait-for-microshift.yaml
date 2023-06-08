@@ -13,3 +13,4 @@
 
 - name: Check if all containers are up and ready
   ansible.builtin.command: /tmp/wait-for-microshift.sh
+  changed_when: true

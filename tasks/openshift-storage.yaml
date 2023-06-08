@@ -8,21 +8,24 @@
       ansible.builtin.command: oc get namespace openshift-storage
       register: _openshift_storage_ns
       failed_when: _openshift_storage_ns.rc not in [0, 1]
+      changed_when: true
 
     - name: Delete openshift storage namespace
       ansible.builtin.command: oc delete namespace openshift-storage
       when: _openshift_storage_ns.rc == 0
+      changed_when: true
 
     - name: Delete topolvm-provisioner storageclass
       ansible.builtin.command: oc delete storageclass topolvm-provisioner
       when: _openshift_storage_ns.rc == 0
+      changed_when: true
 
 - name: Create LVM on loop device to deploy openshift storage with topolvm
   when: not delete_openshift_storage
   block:
     - name: Check if file already exists
       become: true
-      stat:
+      ansible.builtin.stat:
         path: "{{ disk_file_path }}"
       register: _disk_file
 
@@ -48,10 +51,11 @@
           become: true
           ansible.builtin.command: losetup -f
           register: loop_device
+          changed_when: true
 
         - name: Create script to start lvm volumes after reboot
           become: true
-          copy:
+          ansible.builtin.copy:
             src: start-lvm.sh
             dest: /usr/local/bin/start-lvm.sh
             mode: "0755"
@@ -61,6 +65,7 @@
           ansible.builtin.template:
             src: microshift-loop-device.service.j2
             dest: /usr/lib/systemd/system/microshift-loop-device.service
+            mode: "0644"
 
         - name: Enable loop device service
           become: true

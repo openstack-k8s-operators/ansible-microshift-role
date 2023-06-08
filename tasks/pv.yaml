@@ -15,6 +15,7 @@
     group: "{{ ansible_user }}"
     setype: container_file_t
     selevel: s0
+    mode: "0755"
 
 - name: Create PV directories
   become: true
@@ -42,9 +43,11 @@
       provisioner: kubernetes.io/no-provisioner
       volumeBindingMode: WaitForFirstConsumer
     dest: "~{{ ansible_user }}/storage-class.yaml"
+    mode: "0644"
 
 - name: Apply storage class manifest
   ansible.builtin.command: oc apply -f "~{{ ansible_user }}/storage-class.yaml"
+  changed_when: true
 
 - name: Get worker nodes
   ansible.builtin.shell: |
@@ -52,12 +55,14 @@
   tags:
     - skip_ansible_lint
   register: _worker_nodes
+  changed_when: true
 
 - name: Add PV
   ansible.builtin.template:
-    src: pv.yaml
+    src: pv.yaml.j2
     dest: "~{{ ansible_user }}/storage.yaml"
     mode: "0644"
 
 - name: Run PV manifest
   ansible.builtin.command: oc apply -f ~{{ ansible_user }}/storage.yaml
+  changed_when: true

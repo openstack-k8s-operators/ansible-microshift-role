@@ -18,20 +18,21 @@
     src: /etc/dnsmasq.conf
     dest: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
     remote_src: true
+    mode: "0644"
   notify:
     - Disable dnsmasq service
     - Reload NetworkManager
 
 - name: Check if 99-cloud-init.conf exists
   become: true
-  stat:
+  ansible.builtin.stat:
     path: /etc/NetworkManager/conf.d/99-cloud-init.conf
   register: _cloud_init_conf
 
 - name: Comment 99-cloud-init.conf file
   become: true
   when: _cloud_init_conf.stat.exists
-  copy:
+  ansible.builtin.copy:
     content: |
       ## Created by cloud-init on instance boot automatically, do not edit.
       #
@@ -40,6 +41,7 @@
       #[main]
       #dns = none
     dest: /etc/NetworkManager/conf.d/99-cloud-init.conf
+    mode: "0644"
 
 - name: Add information about new dnsmasq configuration file location
   become: true
@@ -58,7 +60,7 @@
     - regexp: "^#server=/3.168.192.in-addr.arpa/10.1.2.3"
       line: "server={{ cloudprovider_dns | default(public_dns) | random }}"
     - regexp: '^# server=10.1.2.3@eth1'
-      line: "server={{ public_dns | random}}"
+      line: "server={{ public_dns | random }}"
     - regexp: "^interface=lo"
       line: "#interface=lo"
     - regexp: "^#address=\/double-click.net\/127.0.0.1"
@@ -79,11 +81,12 @@
           fi
           echo "${IP}"
         dest: /tmp/recognize_ingress_ip.sh
-        mode: 0755
+        mode: "0755"
 
     - name: Get Ingress IP Address
       ansible.builtin.command: /tmp/recognize_ingress_ip.sh
       register: _lb_ip
+      changed_when: true
 
     - name: Set the LB or Router IP address as default address for FQDN
       ansible.builtin.set_fact:
@@ -105,9 +108,10 @@
       [main]
       dns=dnsmasq
     dest: /etc/NetworkManager/conf.d/00-microshift-use-dnsmasq.conf
+    mode: "0644"
   notify:
     - Disable dnsmasq service
     - Reload NetworkManager
 
 - name: Flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
