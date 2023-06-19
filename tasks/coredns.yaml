@@ -35,3 +35,22 @@
 
 - name: Execute the reconfigure-coredns script
   ansible.builtin.command: /usr/local/bin/reconfigure-coredns.sh
+
+- name: Add post run command to overwrite Core DNS
+  become: true
+  community.general.ini_file:
+    path: /usr/lib/systemd/system/microshift.service
+    section: Service
+    option: ExecStartPost
+    value: /bin/bash -c "/usr/local/bin/wait-for-microshift.sh && reconfigure-coredns.sh.j2 || true"
+    backup: true
+    no_extra_spaces: true
+  register: _microshift_service_config
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    name: microshift
+    state: restarted
+    daemon_reload: true
+  when: _microshift_service_config.changed
