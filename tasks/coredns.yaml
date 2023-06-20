@@ -14,7 +14,7 @@
 - name: Check if DNS backup already exists
   become: true
   ansible.builtin.stat:
-    path: /etc/microshift/dns-configmap-default.yaml
+    path: "{{ coredns_config_dir }}/dns-configmap-default.yaml"
   register: _back_dns_configmap
 
 - name: Make backup of current DNS configmap
@@ -23,64 +23,15 @@
     - name: Create dns configmap backup
       become: true
       ansible.builtin.shell: >
-        oc --kubeconfig ~{{ ansible_user }}/.kube/config -n openshift-dns get configmap dns-default
-        -o yaml > {{ coredns_config_dir }}/dns-configmap-default.yaml
-      changed_when: true
+        oc --kubeconfig ~{{ ansible_user }}/.kube/config -n openshift-dns
+        get configmap dns-default -o yaml > {{ coredns_config_dir }}/dns-configmap-default.yaml
 
-    - name: Copy the dns-configmap.yaml to safe location
-      become: true
-      ansible.builtin.copy:
-        src: "{{ coredns_config_dir }}/dns-configmap-default.yaml"
-        dest: "/etc/microshift/dns-configmap-default.yaml"
-        mode: "0644"
-        remote_src: true
+- name: Add reconfigure-dns.sh script
+  become: true
+  ansible.builtin.template:
+    src: reconfigure-coredns.sh.j2
+    dest: /usr/local/bin/reconfigure-coredns.sh
+    mode: "0755"
 
-# To get current core DNS configuration just type:
-# oc -n openshift-dns get configmap dns-default  -o go-template --template '{{.data.Corefile}}'
-- name: Add new domains
-  block:
-    - name: Check if yq already exists
-      ansible.builtin.stat:
-        path: /usr/local/bin/yq
-      register: _yq_bin
-
-    - name: Get yq tool
-      become: true
-      ansible.builtin.get_url:
-        url: https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-        dest: /usr/local/bin/yq
-        mode: "0755"
-      when: not _yq_bin.stat.exists
-
-    - name: Create new Corefile
-      become: true
-      ansible.builtin.template:
-        src: "corefile.yaml"
-        dest: "{{ coredns_config_dir }}/corefile.yaml"
-        mode: "0644"
-      notify: Restart Openshift DNS
-
-    - name: Dump corefile.yaml into raw content
-      become: true
-      ansible.builtin.shell: |
-        cat {{ coredns_config_dir }}/corefile.yaml | xargs -d $'\n' printf '%s\\n' > {{ coredns_config_dir }}/corefile.raw
-      changed_when: true
-
-    - name: Patch configmap with new content
-      become: true
-      ansible.builtin.shell: >
-        /usr/local/bin/yq ".data.Corefile = \"$(cat {{ coredns_config_dir }}/corefile.raw)\""
-        /etc/microshift/dns-configmap-default.yaml > {{ coredns_config_dir }}/patched-corefile.yaml
-      changed_when: true
-
-    - name: Remove keys that will block coredns configmap update
-      become: true
-      ansible.builtin.replace:
-        path: "{{ coredns_config_dir }}/patched-corefile.yaml"
-        regexp: '^\s+creationTimestamp:.*$|^\s+resourceVersion:.*$|^\s+uid:.*$'
-
-    - name: Apply new coredns configmap
-      ansible.builtin.shell: |
-        kubectl apply -f {{ coredns_config_dir }}/patched-corefile.yaml
-      notify: Restart Openshift DNS
-      changed_when: true
+- name: Execute the reconfigure-coredns script
+  ansible.builtin.command: /usr/local/bin/reconfigure-coredns.sh.j2

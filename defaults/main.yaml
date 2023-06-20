@@ -141,7 +141,7 @@ public_dns:
   - 9.9.9.9
 
 # A place where openshift-dns corefile will be stored and changed.
-coredns_config_dir: "/etc/coredns-configs"
+coredns_config_dir: "/etc/microshift/coredns-configs"
 
 # Set the cri-o registry policy to pull images even from untrasted registries.
 overwrite_container_policy: false
