@@ -1,6 +1,6 @@
 ---
 - name: Get service facts
-  service_facts:
+  ansible.builtin.service_facts:
 
 - name: Stop and disable zram0 device
   become: true
@@ -24,6 +24,7 @@
     swapoff /dev/zram0; zramctl --reset /dev/zram0; zramctl
   register: _swap_status
   failed_when: _swap_status.rc != 0
+  changed_when: true
 
 - name: Remove zram packages
   become: true
@@ -36,6 +37,7 @@
   ansible.builtin.file:
     path: /etc/systemd/zram-generator.conf
     state: touch
+    mode: "0644"
 
 - name: Disable swap
   become: true
@@ -43,6 +45,8 @@
     # NOTE: yes, ensure twice that the swap is off.
     swapoff -a; swapoff -a
     sed -i '/swap/d' /etc/fstab
+  changed_when: true
 
 - name: Check current memory state
   ansible.builtin.command: free -m
+  changed_when: false

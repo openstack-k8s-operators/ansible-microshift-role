@@ -9,6 +9,7 @@
   ansible.builtin.file:
     path: "{{ coredns_config_dir }}"
     state: directory
+    mode: "0755"
 
 - name: Check if DNS backup already exists
   become: true
@@ -21,8 +22,10 @@
   block:
     - name: Create dns configmap backup
       become: true
-      ansible.builtin.shell: |
-        oc --kubeconfig ~{{ ansible_user }}/.kube/config -n openshift-dns get configmap dns-default -o yaml > {{ coredns_config_dir }}/dns-configmap-default.yaml
+      ansible.builtin.shell: >
+        oc --kubeconfig ~{{ ansible_user }}/.kube/config -n openshift-dns get configmap dns-default
+        -o yaml > {{ coredns_config_dir }}/dns-configmap-default.yaml
+      changed_when: true
 
     - name: Copy the dns-configmap.yaml to safe location
       become: true
@@ -54,24 +57,30 @@
       ansible.builtin.template:
         src: "corefile.yaml"
         dest: "{{ coredns_config_dir }}/corefile.yaml"
+        mode: "0644"
       notify: Restart Openshift DNS
 
     - name: Dump corefile.yaml into raw content
       become: true
       ansible.builtin.shell: |
         cat {{ coredns_config_dir }}/corefile.yaml | xargs -d $'\n' printf '%s\\n' > {{ coredns_config_dir }}/corefile.raw
+      changed_when: true
 
     - name: Patch configmap with new content
       become: true
-      ansible.builtin.shell: |
-        /usr/local/bin/yq ".data.Corefile = \"$(cat {{ coredns_config_dir }}/corefile.raw)\"" /etc/microshift/dns-configmap-default.yaml > {{ coredns_config_dir }}/patched-corefile.yaml
+      ansible.builtin.shell: >
+        /usr/local/bin/yq ".data.Corefile = \"$(cat {{ coredns_config_dir }}/corefile.raw)\""
+        /etc/microshift/dns-configmap-default.yaml > {{ coredns_config_dir }}/patched-corefile.yaml
+      changed_when: true
 
     - name: Remove keys that will block coredns configmap update
       become: true
-      ansible.builtin.shell: |
-        sed -i '/  creationTimestamp:\|  resourceVersion:\|  uid:/d' {{ coredns_config_dir }}/patched-corefile.yaml
+      ansible.builtin.replace:
+        path: "{{ coredns_config_dir }}/patched-corefile.yaml"
+        regexp: '^\s+creationTimestamp:.*$|^\s+resourceVersion:.*$|^\s+uid:.*$'
 
     - name: Apply new coredns configmap
       ansible.builtin.shell: |
         kubectl apply -f {{ coredns_config_dir }}/patched-corefile.yaml
       notify: Restart Openshift DNS
+      changed_when: true

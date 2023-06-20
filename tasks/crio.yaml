@@ -15,6 +15,7 @@
   tags:
     - skip_ansible_lint
   register: _crio_version
+  changed_when: false
 
 - name: Use only ipv4 - new Microshift
   become: true
@@ -39,8 +40,9 @@
   ansible.builtin.copy:
     src: policy.json
     dest: /etc/containers/policy.json
+    mode: "0644"
   notify: Restart crio
   when: overwrite_container_policy
 
 - name: Flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers

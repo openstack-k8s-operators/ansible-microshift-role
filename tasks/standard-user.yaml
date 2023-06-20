@@ -3,15 +3,18 @@
   ansible.builtin.command: kubectl get namespace {{ standard_user.namespace }}
   register: namespace_exists
   ignore_errors: true
+  changed_when: true
 
 - name: Create a new user namespace
   ansible.builtin.command: kubectl create namespace {{ standard_user.namespace }}
   when: namespace_exists.rc != 0
+  changed_when: true
 
-- name: Create the {{ certs_dir }} directory
+- name: Create directory {{ certs_dir }}
   ansible.builtin.file:
     path: "{{ certs_dir }}"
     state: directory
+    mode: "0755"
 
 - name: Check for user cert
   ansible.builtin.stat:
@@ -19,6 +22,7 @@
   register: user_cert
 
 - name: Create user certs if not exists
+  when: not user_cert.stat.exists
   block:
     - name: Gen user private key
       community.crypto.openssl_privatekey:
@@ -54,6 +58,7 @@
         --client-key=$(readlink -f {{ certs_dir }}/{{ standard_user.name }}.key)
       environment:
         HOME: ""
+      changed_when: true
 
     - name: Amend kubeconfig to add new context
       ansible.builtin.command: >
@@ -63,6 +68,7 @@
         --namespace={{ standard_user.namespace }}
       environment:
         HOME: ""
+      changed_when: true
 
     # https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
     - name: Add new RoleBinding for standard-user into playground namespace
@@ -83,10 +89,10 @@
             name: {{ standard_user.role }}
             apiGroup: rbac.authorization.k8s.io
         dest: ~{{ ansible_user }}/{{ standard_user.namespace }}-rb.yaml
+        mode: "0644"
 
     - name: Apply new user manifest
       ansible.builtin.command: >
         kubectl apply -f {{ standard_user.namespace }}-rb.yaml
         --namespace {{ standard_user.namespace }}
-
-  when: not user_cert.stat.exists
+      changed_when: true

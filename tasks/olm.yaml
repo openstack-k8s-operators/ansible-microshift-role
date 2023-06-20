@@ -1,7 +1,9 @@
+---
 - name: Ensure installation directory
-  file:
+  ansible.builtin.file:
     path: "{{ repo_dir }}"
     state: directory
+    mode: "0755"
 
 - name: Fetch operator-sdk
   ansible.builtin.uri:
@@ -17,12 +19,15 @@
     "{{ repo_dir }}/operator-sdk olm status"
   register: olm_status
   failed_when: olm_status.rc not in [0, 1]
+  changed_when: true
 
 - name: Install OLM with SDK
   ansible.builtin.command:
     "{{ repo_dir }}/operator-sdk olm install --version {{ olm_version }}"
   when: olm_status.rc != 0
+  changed_when: true
 
 - name: Ensure privileged SCC for OLM
   ansible.builtin.command:
     oc adm policy add-scc-to-user privileged system:serviceaccount:olm:default
+  changed_when: true

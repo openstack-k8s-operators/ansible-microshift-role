@@ -6,6 +6,7 @@
       become: true
       ansible.builtin.shell: |
         dnf copr enable -y @redhat-et/microshift
+      changed_when: true
 
     - name: Install microshift package
       become: true
@@ -24,7 +25,7 @@
   when: not use_copr_microshift
 
 - name: Flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Wait for kubeconfig file after deploying Microshift
   become: true
@@ -38,6 +39,7 @@
   ansible.builtin.file:
     path: ~/.kube
     state: directory
+    mode: "0755"
 
 - name: Copy kubeconfig
   become: true
@@ -47,3 +49,4 @@
     remote_src: true
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
+    mode: "0644"
