@@ -34,4 +34,4 @@
     mode: "0755"
 
 - name: Execute the reconfigure-coredns script
-  ansible.builtin.command: /usr/local/bin/reconfigure-coredns.sh.j2
+  ansible.builtin.command: /usr/local/bin/reconfigure-coredns.sh
