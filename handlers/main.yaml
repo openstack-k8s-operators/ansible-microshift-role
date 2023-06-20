@@ -26,8 +26,3 @@
     name: microshift
     state: started
     enabled: true
-
-- name: Restart Openshift DNS
-  ansible.builtin.shell: |
-    kubectl -n openshift-dns rollout restart daemonsets dns-default
-    kubectl -n openshift-dns rollout restart daemonsets node-resolver

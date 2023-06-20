@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if ! [ -f ~/.kube/config ]; then
+    export KUBECONFIG=/var/lib/microshift/resources/kubeadmin/kubeconfig
+fi
+
+if ! oc -n openshift-dns get configmap dns-default -o jsonpath="{.data}" | grep -q "forward . {{ ansible_default_ipv4.address }}:53"; then
+    oc -n openshift-dns get configmap dns-default -o yaml | \
+    sed "s@        prometheus 127.0.0.1:9153@        prometheus 127.0.0.1:9153\n        forward . {{ ansible_default_ipv4.address }}:53\n@g" | \
+    oc replace -f -
+    oc -n openshift-dns rollout restart daemonsets dns-default
+fi
