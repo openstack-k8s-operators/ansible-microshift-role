@@ -107,11 +107,19 @@
       # MANAGED BY ANSIBLE
       [main]
       dns=dnsmasq
+      rc-manager=unmanaged
     dest: /etc/NetworkManager/conf.d/00-microshift-use-dnsmasq.conf
     mode: "0644"
   notify:
     - Disable dnsmasq service
     - Reload NetworkManager
+
+- name: Change default nameserver to host ip address
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    insertbefore: '^nameserver'
+    line: 'nameserver {{ ansible_default_ipv4.address }}'
 
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
