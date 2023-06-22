@@ -121,6 +121,7 @@
     insertbefore: '^nameserver'
     line: 'nameserver {{ ansible_default_ipv4.address }}'
     firstmatch: true
+  notify: Restart Openshift DNS
 
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
