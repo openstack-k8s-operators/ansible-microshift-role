@@ -120,6 +120,7 @@
     path: /etc/resolv.conf
     insertbefore: '^nameserver'
     line: 'nameserver {{ ansible_default_ipv4.address }}'
+    firstmatch: true
 
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
