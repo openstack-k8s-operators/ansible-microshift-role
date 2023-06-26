@@ -24,6 +24,23 @@
   notify: Restart Microshift
   when: not use_copr_microshift
 
+- name: Change Microshift configuration files
+  become: true
+  ansible.builtin.copy:
+    content: "{{ vars[item.var_name] | to_nice_yaml(indent=2) }}"
+    dest: "/etc/microshift/{{ item.dest }}"
+    mode: "0644"
+    owner: root
+    group: root
+  loop:
+    - var_name: microshift_config
+      dest: config.yaml
+    - var_name: microshift_lmvd
+      dest: lvmd.yaml
+    - var_name: microshift_ovn
+      dest: ovn.yaml
+  when: "{{ vars[item.var_name] }}"
+
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
 
