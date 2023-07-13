@@ -64,7 +64,7 @@
     - regexp: "^interface=lo"
       line: "#interface=lo"
     - regexp: "^#address=\/double-click.net\/127.0.0.1"
-      line: "address=/{{ fqdn }}/127.0.0.1"
+      line: "address=/{{ fqdn }}/{{ ansible_default_ipv4.address }}"
     - regexp: "^#listen-address="
       line: "listen-address={{ ansible_default_ipv4.address }}"
 
