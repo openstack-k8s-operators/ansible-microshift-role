@@ -14,3 +14,8 @@
 - name: Check if all containers are up and ready
   ansible.builtin.command: /tmp/wait-for-microshift.sh
   changed_when: true
+  register: _microshift_svc_status
+
+- name: Print all resources when wait for microshift fail
+  ansible.builtin.command: oc get all --all-namespaces
+  when: _microshift_svc_status.rc == 1
