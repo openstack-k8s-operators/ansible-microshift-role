@@ -28,6 +28,10 @@
 - name: Prepare firewall
   ansible.builtin.include_tasks: firewall.yaml
 
+- name: Use ramdisk for etcd service
+  ansible.builtin.include_tasks: etcd_ramdisk.yaml
+  when: etcd_on_ramdisk
+
 - name: Setup Microshift
   ansible.builtin.include_tasks: microshift.yaml
 
