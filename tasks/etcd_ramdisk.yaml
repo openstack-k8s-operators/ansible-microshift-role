@@ -1,0 +1,31 @@
+---
+- name: Create directory for etcd
+  become: true
+  ansible.builtin.file:
+    path: "{{ ramdisk_path }}"
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
+
+- name: Mount ramdisk
+  become: true
+  ansible.posix.mount:
+    src: tmpfs
+    name: "{{ ramdisk_path }}"
+    fstype: tmpfs
+    state: mounted
+    opts: "defaults,size={{ ramdisk_size }}"
+
+- name: Set proper permissions after mount
+  become: true
+  ansible.builtin.file:
+    path: "{{ ramdisk_path }}"
+    state: directory
+    mode: 0700
+    owner: root
+    group: root
+
+- name: Set proper SELinux context
+  become: true
+  ansible.builtin.command: restorecon -F {{ ramdisk_path }}

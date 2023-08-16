@@ -185,3 +185,11 @@ public_dns:
 
 # Set the cri-o registry policy to pull images even from untrasted registries.
 overwrite_container_policy: false
+
+# Experimental features: you should not use it on the production!
+# That feature might be useful for the CI, especially when the disk is slow.
+etcd_on_ramdisk: false
+# Path for the etcd directory used by the microshift-etcd service.
+ramdisk_path: /var/lib/microshift/etcd
+# Ramdisk size for etcd service
+ramdisk_size: 512m
