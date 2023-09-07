@@ -58,7 +58,7 @@
     line: "{{ item.line }}"
   loop:
     - regexp: "^#server=/3.168.192.in-addr.arpa/10.1.2.3"
-      line: "server={{ cloudprovider_dns | default(public_dns) | random }}"
+      line: "server={{ (cloudprovider_dns | random if cloudprovider_dns else public_dns | random) }}"
     - regexp: '^# server=10.1.2.3@eth1'
       line: "server={{ public_dns | random }}"
     - regexp: "^interface=lo"
