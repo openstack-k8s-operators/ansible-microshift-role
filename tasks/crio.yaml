@@ -25,6 +25,8 @@
     mode: "0644"
   notify: Restart crio
   when: microshift_version > 4.12
+  retries: 6
+  delay: 10
 
 - name: Use only ipv4 - legacy Microshift
   become: true
@@ -34,6 +36,8 @@
     mode: "0644"
   notify: Restart crio
   when: microshift_version <= 4.12
+  retries: 6
+  delay: 10
 
 - name: Apply container policy from crc
   become: true
