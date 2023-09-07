@@ -175,13 +175,12 @@ microshift_frontend_address: ""
 microshift_additional_addresses: []
 # Set the cloud provider DNS IP addresses. Replace below DNS servers with your
 # Cloud provider DNS addresses.
-cloudprovider_dns:
-  - 1.1.1.1
-  - 1.0.0.1
+cloudprovider_dns: []
 # Set the DNS ip addresses for public DNS.
 public_dns:
   - 8.8.8.8
   - 9.9.9.9
+  - 1.1.1.1
 
 # Set the cri-o registry policy to pull images even from untrasted registries.
 overwrite_container_policy: false
