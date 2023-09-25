@@ -39,7 +39,7 @@
       dest: lvmd.yaml
     - var_name: microshift_ovn
       dest: ovn.yaml
-  when: "{{ vars[item.var_name] }}"
+  when: vars[item.var_name]
 
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
