@@ -1,11 +1,4 @@
 ---
-- name: Disable dnsmasq service
-  become: true
-  ansible.builtin.systemd:
-    name: dnsmasq
-    state: stopped
-    enabled: false
-
 - name: Reload NetworkManager
   become: true
   ansible.builtin.systemd:

@@ -3,26 +3,6 @@
 # to the systemd-resolved service, but after a test, for dnsmasq and Microshift 4.12,
 # it is better when the dnsmasq service is deployed after the Microshift pods are
 # running.
-- name: Install DNSMasq
-  become: true
-  ansible.builtin.package:
-    name: dnsmasq
-    state: present
-  notify: Disable dnsmasq service
-
-# NOTE: The dnsmasq can be stopped, because the NetworkManager would spawn
-# own instance of it and will respect its config.
-- name: Copy dnsmasq configuration file to NetworkManager dir
-  become: true
-  ansible.builtin.copy:
-    src: /etc/dnsmasq.conf
-    dest: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
-    remote_src: true
-    mode: "0644"
-  notify:
-    - Disable dnsmasq service
-    - Reload NetworkManager
-
 - name: Check if 99-cloud-init.conf exists
   become: true
   ansible.builtin.stat:
@@ -43,30 +23,18 @@
     dest: /etc/NetworkManager/conf.d/99-cloud-init.conf
     mode: "0644"
 
-- name: Add information about new dnsmasq configuration file location
-  become: true
-  ansible.builtin.lineinfile:
-    path: /etc/dnsmasq.conf
-    insertbefore: '^# Configuration file for dnsmasq.'
-    line: "\n\n# ANSIBLE: This file is now managed by NetworkManager - /etc/NetworkManager/dnsmasq.d/dnsmasq.conf\n\n"
-
 - name: Change DNSMasq configuration file in NetworkManager
   become: true
   ansible.builtin.lineinfile:
     path: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
+    line: "{{ item }}"
+    create: true
   loop:
-    - regexp: "^#server=/3.168.192.in-addr.arpa/10.1.2.3"
-      line: "server={{ (cloudprovider_dns | random if cloudprovider_dns else public_dns | random) }}"
-    - regexp: '^# server=10.1.2.3@eth1'
-      line: "server={{ public_dns | random }}"
-    - regexp: "^interface=lo"
-      line: "#interface=lo"
-    - regexp: "^#address=\/double-click.net\/127.0.0.1"
-      line: "address=/{{ fqdn }}/{{ ansible_default_ipv4.address }}"
-    - regexp: "^#listen-address="
-      line: "listen-address={{ ansible_default_ipv4.address }}"
+    - "server={{ (cloudprovider_dns | random if cloudprovider_dns else public_dns | random) }}"
+    - "server={{ public_dns | random }}"
+    - "address=/{{ fqdn }}/{{ ansible_default_ipv4.address }}"
+    - "listen-address={{ ansible_default_ipv4.address }}"
+    - "bind-interfaces"
 
 - name: Get the LoadBalander ip address or Openshift Router ip address
   when: not microshift_frontend_address
@@ -111,7 +79,6 @@
     dest: /etc/NetworkManager/conf.d/00-microshift-use-dnsmasq.conf
     mode: "0644"
   notify:
-    - Disable dnsmasq service
     - Reload NetworkManager
 
 - name: Change default nameserver to host ip address
