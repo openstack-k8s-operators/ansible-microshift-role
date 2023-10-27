@@ -23,19 +23,6 @@
     dest: /etc/NetworkManager/conf.d/99-cloud-init.conf
     mode: "0644"
 
-- name: Change DNSMasq configuration file in NetworkManager
-  become: true
-  ansible.builtin.lineinfile:
-    path: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
-    line: "{{ item }}"
-    create: true
-  loop:
-    - "server={{ (cloudprovider_dns | random if cloudprovider_dns else public_dns | random) }}"
-    - "server={{ public_dns | random }}"
-    - "address=/{{ fqdn }}/{{ ansible_default_ipv4.address }}"
-    - "listen-address={{ ansible_default_ipv4.address }}"
-    - "bind-interfaces"
-
 - name: Get the LoadBalander ip address or Openshift Router ip address
   when: not microshift_frontend_address
   block:
@@ -60,13 +47,18 @@
       ansible.builtin.set_fact:
         microshift_frontend_address: "{{ _lb_ip.stdout }}"
 
-- name: Add new addresses to bind to the ingress
+- name: Change DNSMasq configuration file in NetworkManager
   become: true
   ansible.builtin.lineinfile:
     path: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
-    line: "address=/{{ item }}/{{ microshift_frontend_address }}"
-  loop: "{{ microshift_additional_addresses }}"
-  when: microshift_frontend_address
+    line: "{{ item }}"
+    create: true
+  loop:
+    - "server={{ (cloudprovider_dns | random if cloudprovider_dns else public_dns | random) }}"
+    - "server={{ public_dns | random }}"
+    - "address=/{{ fqdn }}/{{ microshift_frontend_address | default(ansible_default_ipv4.address) }}"
+    - "listen-address={{ ansible_default_ipv4.address }}"
+    - "bind-interfaces"
 
 - name: Add dnsmasq rule for NetworkManager
   become: true
