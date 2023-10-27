@@ -56,9 +56,17 @@
   loop:
     - "server={{ (cloudprovider_dns | random if cloudprovider_dns else public_dns | random) }}"
     - "server={{ public_dns | random }}"
-    - "address=/{{ fqdn }}/{{ microshift_frontend_address | default(ansible_default_ipv4.address) }}"
     - "listen-address={{ ansible_default_ipv4.address }}"
     - "bind-interfaces"
+    - "addn-hosts=/etc/hosts"
+
+- name: Add new addresses to bind to the ingress
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
+    line: "address=/{{ item }}/{{ microshift_frontend_address }}"
+  loop: "{{ microshift_additional_addresses }}"
+  when: microshift_frontend_address
 
 - name: Add dnsmasq rule for NetworkManager
   become: true
