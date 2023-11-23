@@ -1,4 +1,13 @@
 ---
+- name: Get existing volume groups
+  ansible.builtin.shell: "vgs"
+  become: true
+  register: _vgs
+
+- ansible.builtin.set_fact:
+    vg_create: false
+  when: vg_name in _vgs.stdout
+
 - name: Delete openshift-storage if needed
   when: delete_openshift_storage
   block:
@@ -21,7 +30,9 @@
       changed_when: true
 
 - name: Create LVM on loop device to deploy openshift storage with topolvm
-  when: not delete_openshift_storage
+  when:
+    - not delete_openshift_storage
+    - not vg_create
   block:
     - name: Check if file already exists
       become: true

@@ -144,6 +144,9 @@ disk_file_sparsed: false
 # Default value for Microshift is `rhel`.
 vg_name: rhel
 
+# Create vg if it doesn't exist
+vg_create: true
+
 ########################
 ### Additional users ###
 ########################
