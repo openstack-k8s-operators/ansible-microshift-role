@@ -83,7 +83,6 @@ microshift_ovn: {}
 #   externalGatewayInterface: ""
 # mtu: 1500
 
-
 #######################################
 ###              OLM                ###
 #######################################
@@ -123,11 +122,11 @@ pv_count:
 ###        Openshift Storage        ###
 #######################################
 #
-# Set to true if the openshift-storage should be deleted.
-# NOTE: After restart the Microshift service, the openshift-storage will be
-# recreated. In that case, it is recommended to set the value to false and
-# it will create a LVM base on loopback file disk.
-delete_openshift_storage: false
+# Create expected VG "rhel" (for topolvm/openshift-storage)
+# The VG is created inside a file as a loop device. This is a handy solution
+# for the CI and Microshift testing purpose.
+# When the VG is already available on the machine then not VG is populated.
+vg_create: true
 
 # Set the path for a file, where later Ansible would create a LVM partition.
 # It would be needed when `delete_openshift_storage` is set to false.
@@ -143,9 +142,6 @@ disk_file_sparsed: false
 # Name of the volume group used by the openshift-storage to deploy topolvm.
 # Default value for Microshift is `rhel`.
 vg_name: rhel
-
-# Create vg if it doesn't exist
-vg_create: true
 
 ########################
 ### Additional users ###

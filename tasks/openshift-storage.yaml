@@ -8,30 +8,8 @@
     vg_create: false
   when: vg_name in _vgs.stdout
 
-- name: Delete openshift-storage if needed
-  when: delete_openshift_storage
-  block:
-    # NOTE: The Openshift storage uses topolvm, that requires additional volume,
-    # which is not necessary for us, due we mostly use that playbook for CI.
-    - name: Check if openshift-storage namespace exists
-      ansible.builtin.command: oc get namespace openshift-storage
-      register: _openshift_storage_ns
-      failed_when: _openshift_storage_ns.rc not in [0, 1]
-      changed_when: true
-
-    - name: Delete openshift storage namespace
-      ansible.builtin.command: oc delete namespace openshift-storage
-      when: _openshift_storage_ns.rc == 0
-      changed_when: true
-
-    - name: Delete topolvm-provisioner storageclass
-      ansible.builtin.command: oc delete storageclass topolvm-provisioner
-      when: _openshift_storage_ns.rc == 0
-      changed_when: true
-
 - name: Create LVM on loop device to deploy openshift storage with topolvm
   when:
-    - not delete_openshift_storage
     - not vg_create
   block:
     - name: Check if file already exists
