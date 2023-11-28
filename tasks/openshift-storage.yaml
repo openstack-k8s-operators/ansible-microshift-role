@@ -9,8 +9,7 @@
   when: vg_name in _vgs.stdout
 
 - name: Create LVM on loop device to deploy openshift storage with topolvm
-  when:
-    - not vg_create
+  when: vg_create
   block:
     - name: Check if file already exists
       become: true
