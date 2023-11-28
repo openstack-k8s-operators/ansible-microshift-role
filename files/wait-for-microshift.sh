@@ -23,4 +23,5 @@ done
 # Normally, the script should finished in the for loop, but if it's not
 # it should exit with an error.
 echo -e "\nSomthing is not deployed in Microshift. Exit!\n"
+oc get pods --all-namespaces | grep openshift
 exit 1
