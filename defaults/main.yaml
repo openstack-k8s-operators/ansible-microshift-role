@@ -143,19 +143,6 @@ disk_file_sparsed: false
 # Default value for Microshift is `rhel`.
 vg_name: rhel
 
-########################
-### Additional users ###
-########################
-
-# Location where the user certificates should be keeped.
-certs_dir: "~{{ ansible_user }}/.certs"
-
-# Create a new user inside the Microshift cluster.
-standard_user:
-  name: dev-admin
-  namespace: dev-admin
-  role: admin
-
 #######################################
 ###              Others             ###
 #######################################
