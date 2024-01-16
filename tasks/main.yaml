@@ -39,10 +39,6 @@
   ansible.builtin.include_tasks: registry_login.yaml
   when: not use_copr_microshift
 
-- name: Create persistent volume
-  ansible.builtin.include_tasks: pv.yaml
-  when: create_pv
-
 - name: Create lvm or delete openshift storage
   ansible.builtin.include_tasks: openshift-storage.yaml
 
