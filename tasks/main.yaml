@@ -49,10 +49,6 @@
 - name: Verify that Microshift deployment is finished
   ansible.builtin.include_tasks: wait-for-microshift.yaml
 
-- name: Create standard-user and playground namespace
-  ansible.builtin.include_tasks: standard-user.yaml
-  when: standard_user
-
 - name: Configure DNSMasq
   ansible.builtin.include_tasks: dnsmasq.yaml
   when: configure_dnsmasq
