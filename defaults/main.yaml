@@ -100,25 +100,6 @@ repo_dir: "~{{ ansible_user }}/repos"
 operator_sdk_version: "v1.28.0"
 
 #######################################
-### Persistent volume configuration ###
-#######################################
-
-# Create PV (Persistent Volumes) that are configured on host local storage.
-create_pv: true
-
-# Name of the storageclass used to create PV.
-pv_storageclass: local-storage
-
-# Path on the host, where the PV data is stored.
-pv_host_path: "/mnt/data"
-
-# Counter how many PV should be created.
-# NOTE: It also creates separate directories in `pv_host_path`.
-pv_count:
-  start: 1
-  end: 15
-
-#######################################
 ###        Openshift Storage        ###
 #######################################
 #
