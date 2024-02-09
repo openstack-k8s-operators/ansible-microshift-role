@@ -9,35 +9,13 @@
     enablerepo: microshift-deps-rpms
   notify: Restart crio
 
-- name: Get cri-o version
-  ansible.builtin.shell: |
-    rpm -qa --qf '%{VERSION}' cri-o
-  tags:
-    - skip_ansible_lint
-  register: _crio_version
-  changed_when: false
-
-- name: Use only ipv4 - new Microshift
+- name: Use only ipv4
   become: true
-  ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/cri-o/cri-o/v{{ _crio_version.stdout }}/contrib/cni/11-crio-ipv4-bridge.conflist
+  ansible.builtin.copy:
+    src: crio-bridge.conf
     dest: /etc/cni/net.d/100-crio-bridge.conf
     mode: "0644"
   notify: Restart crio
-  when: microshift_version > 4.12
-  retries: 6
-  delay: 10
-
-- name: Use only ipv4 - legacy Microshift
-  become: true
-  ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/cri-o/cri-o/v{{ _crio_version.stdout }}/contrib/cni/11-crio-ipv4-bridge.conf
-    dest: /etc/cni/net.d/100-crio-bridge.conf
-    mode: "0644"
-  notify: Restart crio
-  when: microshift_version <= 4.12
-  retries: 6
-  delay: 10
 
 - name: Apply container policy from crc
   become: true
