@@ -67,3 +67,9 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "0644"
+
+- name: Replace localhost with host ip address
+  ansible.builtin.lineinfile:
+    path: "~{{ ansible_user }}/.kube/config"
+    regexp: "^    server: https://localhost:6443"
+    line: "    server: https://{{ ansible_default_ipv4.address }}:6443"
