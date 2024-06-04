@@ -21,7 +21,12 @@ for i in {1..20}; do
 done
 
 # Normally, the script should finished in the for loop, but if it's not
-# it should exit with an error.
-echo -e "\nSomthing is not deployed in Microshift. Exit!\n"
-oc get pods --all-namespaces | grep openshift
+# it should exit with an error. Before that, describe all pods that
+# are not running correctly.
+echo -e "\nSomthing is not deployed in Microshift!\n"
+oc get pods --all-namespaces --no-headers | grep -Evi 'running|completed' | while read -r ns pod rest; do
+    echo -e "\nChecking ${pod} in namespace ${ns}"
+    kubectl -n "${ns}" describe pod "${pod}";
+    kubectl -n "${ns}" logs "${pod}" || true
+done
 exit 1
