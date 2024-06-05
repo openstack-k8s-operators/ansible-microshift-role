@@ -29,4 +29,13 @@ oc get pods --all-namespaces --no-headers | grep -Evi 'running|completed' | whil
     kubectl -n "${ns}" describe pod "${pod}";
     kubectl -n "${ns}" logs "${pod}" || true
 done
+
+# Print additional information related to the storage
+systemctl status microshift-loop-device
+losetup
+lsblk
+sudo vgdisplay
+sudo lvdisplay
+sudo vgs
+
 exit 1
