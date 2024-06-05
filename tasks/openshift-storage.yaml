@@ -63,8 +63,31 @@
             enabled: true
             daemon_reload: true
 
+        - name: Wait for microshift-loop-device service to be active
+          ansible.builtin.command: systemctl is-active microshift-loop-device
+          register: systemd_result
+          until: "'inactive' not in systemd_result.stdout"
+          retries: 10
+          delay: 5
+
+        - name: Get loop device list
+          become: true
+          ansible.builtin.command: losetup --list
+          register: _losetup_list
+
         - name: Create volume group
           become: true
           community.general.lvg:
             vg: "{{ vg_name }}"
             pvs: "{{ loop_device.stdout }}"
+
+        - name: Get information about volume groups
+          become: true
+          ansible.builtin.command: vgdisplay
+          register: _vg_list
+
+        - name: Ensure that loop device and volume group are present
+          ansible.builtin.assert:
+            that:
+            - loop_device.stdout in _losetup_list.stdout
+            - vg_name in _vg_list.stdout
