@@ -1,9 +1,9 @@
 [microshift-rpms]
 name=Puddle of Microshift RPMs
-{% if microshift_version == 4.12 %}
-baseurl=https://mirror.openshift.com/pub/openshift-v4/$basearch/microshift/ocp-dev-preview/latest-{{ microshift_version }}/el8/os/
-{% else %}
+{% if microshift_version == 4.12 or microshift_version == 4.13 %}
 baseurl=https://mirror.openshift.com/pub/openshift-v4/$basearch/microshift/ocp-dev-preview/latest-{{ microshift_version }}/el{{ ansible_distribution_major_version }}/os/
+{% else %}
+baseurl=https://mirror.openshift.com/pub/openshift-v4/$basearch/microshift/ocp/latest-{{ microshift_version }}/el{{ ansible_distribution_major_version }}/os/
 {% endif %}
 enabled=0
 gpgcheck=0
