@@ -98,15 +98,18 @@ setup_olm: false
 # https://github.com/operator-framework/operator-lifecycle-manager/releases
 olm_version: "v0.28.0"
 
-# Location where the additional projects should be keeped.
-# For example, if `setup_olm` is enabled, it will use Git to clone project
-# to that directory.
-repo_dir: "~{{ ansible_user }}/repos"
-
 # Version of the Operator SDK
 # https://github.com/operator-framework/operator-sdk/releases
 operator_sdk_version: "v1.34.2"
 
+# The Operatorhub does not work as expected on MicroShift 4.14 and newer,
+# because of the SCC permissions. Below parameter will apply changes in
+# SCC policy and change manifest for operatorhub to get packagemanifests working:
+#
+#    oc get packagemanifests.packages.operators.coreos.com -n olm
+#
+# WARNING: USE THIS OPTION AT YOUR OWN RISK
+olm_operatorhub_workaround: false
 #######################################
 ###        Openshift Storage        ###
 #######################################

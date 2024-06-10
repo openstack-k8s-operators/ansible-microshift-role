@@ -1,33 +1,45 @@
 ---
-- name: Ensure installation directory
-  ansible.builtin.file:
-    path: "{{ repo_dir }}"
-    state: directory
-    mode: "0755"
-
 - name: Fetch operator-sdk
+  become: true
   ansible.builtin.uri:
     url: https://github.com/operator-framework/operator-sdk/releases/download/{{ operator_sdk_version }}/operator-sdk_linux_amd64
-    dest: "{{ repo_dir }}/operator-sdk"
+    dest: /usr/local/bin/operator-sdk
     mode: "755"
     status_code:
       - 200
       - 304
 
 - name: Check if OLM is installed
-  ansible.builtin.command:
-    "{{ repo_dir }}/operator-sdk olm status"
+  ansible.builtin.command: /usr/local/bin/operator-sdk olm status
   register: olm_status
   failed_when: olm_status.rc not in [0, 1]
   changed_when: true
 
 - name: Install OLM with SDK
-  ansible.builtin.command:
-    "{{ repo_dir }}/operator-sdk olm install --version {{ olm_version }}"
+  ansible.builtin.shell: |
+    /usr/local/bin/operator-sdk olm install --version "{{ olm_version }}"
   when: olm_status.rc != 0
   changed_when: true
 
-- name: Ensure privileged SCC for OLM
-  ansible.builtin.command:
-    oc adm policy add-scc-to-user privileged system:serviceaccount:olm:default
+- name: Add OperatorHub.io CatalogSource
+  ansible.builtin.copy:
+    src: operatorhubio.yaml
+    dest: /tmp/operatorhubio.yaml
+    mode: "0644"
+
+- name: Apply Operatorhub CatalogSource
+  ansible.builtin.command: oc apply -f /tmp/operatorhubio.yaml
+  register: _operatorhub
+  failed_when: _operatorhub.rc not in [0,1]
   changed_when: true
+
+- name: Apply operatorhub.io workaround
+  when: olm_operatorhub_workaround
+  block:
+    - name: Fix SCC permissions to be compatible with cert-manager OLM
+      ansible.builtin.shell: |
+        oc patch scc restricted --type=merge -p '{"runAsUser": {"type": "RunAsAny"}}'
+        oc patch scc restricted-v2 --type=merge -p '{"runAsUser": {"type": "RunAsAny"}}'
+      register: _scc_commands
+      failed_when: _scc_commands.rc not in [0,1]
+      changed_when: true
