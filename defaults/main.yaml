@@ -43,11 +43,11 @@ microshift_version: 4.14
 
 # Default settings from /etc/microshift/config.yaml.default
 # https://github.com/openshift/microshift/blob/release-4.14/packaging/microshift/config.yaml
-microshift_config: {}
-#  apiServer:
+microshift_config:
+  apiServer:
+    subjectAltNames:
+      - "{{ fqdn }}"
 #    advertiseAddress: ""
-#    subjectAltNames:
-#      - ""
 #  debugging:
 #    logLevel: Normal
 #  dns:
