@@ -21,13 +21,18 @@
   failed_when: olm_status.rc not in [0, 1]
   changed_when: true
 
+# Set ns/user to SCC before we run the OLM installation
+- name: Ensure privileged SCC for OLM
+  ansible.builtin.command:
+    oc adm policy add-scc-to-user privileged system:serviceaccount:olm:{{ item }}
+  changed_when: true
+  loop:
+    - "default"
+    - "operatorhubio-catalog"
+    - "olm-operator-serviceaccount"
+
 - name: Install OLM with SDK
   ansible.builtin.command:
     "{{ repo_dir }}/operator-sdk olm install --version {{ olm_version }}"
   when: olm_status.rc != 0
-  changed_when: true
-
-- name: Ensure privileged SCC for OLM
-  ansible.builtin.command:
-    oc adm policy add-scc-to-user privileged system:serviceaccount:olm:default
   changed_when: true
