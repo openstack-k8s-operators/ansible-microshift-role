@@ -48,7 +48,7 @@
 - name: Wait for kubeconfig file after deploying Microshift
   become: true
   ansible.builtin.wait_for:
-    path: /var/lib/microshift/resources/kubeadmin/kubeconfig
+    path: /var/lib/microshift/resources/kubeadmin/{{ fqdn }}/kubeconfig
     search_regex: microshift
     delay: 5
     timeout: 300
@@ -59,10 +59,20 @@
     state: directory
     mode: "0755"
 
-- name: Copy kubeconfig
+- name: Copy kubeconfig for localhost
   become: true
   ansible.builtin.copy:
     src: /var/lib/microshift/resources/kubeadmin/kubeconfig
+    dest: "~{{ ansible_user }}/.kube/config-localhost"
+    remote_src: true
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+
+- name: "Copy kubeconfig for {{ fqdn }}"
+  become: true
+  ansible.builtin.copy:
+    src: /var/lib/microshift/resources/kubeadmin/{{ fqdn }}/kubeconfig
     dest: "~{{ ansible_user }}/.kube/config"
     remote_src: true
     owner: "{{ ansible_user }}"
