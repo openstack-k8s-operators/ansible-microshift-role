@@ -27,7 +27,8 @@
 - name: Change Microshift configuration files
   become: true
   ansible.builtin.copy:
-    content: "{{ vars[item.var_name] | to_nice_yaml(indent=2) }}"
+    content: |
+      {{ lookup('vars', item.var_name) | to_nice_yaml(indent=2) }}
     dest: "/etc/microshift/{{ item.dest }}"
     mode: "0644"
     owner: root
