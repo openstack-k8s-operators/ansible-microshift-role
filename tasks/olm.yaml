@@ -1,22 +1,16 @@
 ---
-- name: Ensure installation directory
-  ansible.builtin.file:
-    path: "{{ repo_dir }}"
-    state: directory
-    mode: "0755"
-
 - name: Fetch operator-sdk
+  become: true
   ansible.builtin.uri:
     url: https://github.com/operator-framework/operator-sdk/releases/download/{{ operator_sdk_version }}/operator-sdk_linux_amd64
-    dest: "{{ repo_dir }}/operator-sdk"
+    dest: /usr/local/bin/operator-sdk
     mode: "755"
     status_code:
       - 200
       - 304
 
 - name: Check if OLM is installed
-  ansible.builtin.command:
-    "{{ repo_dir }}/operator-sdk olm status"
+  ansible.builtin.command: /usr/local/bin/operator-sdk olm status
   register: olm_status
   failed_when: olm_status.rc not in [0, 1]
   changed_when: true
@@ -32,7 +26,7 @@
     - "olm-operator-serviceaccount"
 
 - name: Install OLM with SDK
-  ansible.builtin.command:
-    "{{ repo_dir }}/operator-sdk olm install --version {{ olm_version }}"
+  ansible.builtin.command: |
+    /usr/local/bin/operator-sdk olm install --version {{ olm_version }}
   when: olm_status.rc != 0
   changed_when: true
