@@ -32,9 +32,6 @@
   ansible.builtin.include_tasks: etcd_ramdisk.yaml
   when: etcd_on_ramdisk
 
-- name: Create VG and LVM for openshift-storage topolvm
-  ansible.builtin.include_tasks: openshift-storage.yaml
-
 - name: Setup Microshift
   ansible.builtin.include_tasks: microshift.yaml
 
@@ -43,6 +40,12 @@
   when: not use_copr_microshift
 
 - name: Verify that Microshift deployment is finished
+  ansible.builtin.include_tasks: wait-for-microshift.yaml
+
+- name: Create VG and LVM for openshift-storage topolvm
+  ansible.builtin.include_tasks: openshift-storage.yaml
+
+- name: Wait for the openshift-storage to be deployed
   ansible.builtin.include_tasks: wait-for-microshift.yaml
 
 - name: Configure DNSMasq
