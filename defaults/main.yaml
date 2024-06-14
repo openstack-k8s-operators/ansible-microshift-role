@@ -47,11 +47,12 @@ microshift_config:
   apiServer:
     subjectAltNames:
       - "{{ fqdn }}"
+      - "{{ ansible_default_ipv4.address }}"
 #    advertiseAddress: ""
+  dns:
+    baseDomain: "{{ fqdn }}"
 #  debugging:
 #    logLevel: Normal
-#  dns:
-#    baseDomain: example.com
 #  etcd:
 #    memoryLimitMB: 0
 #  manifests:
