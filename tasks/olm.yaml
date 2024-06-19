@@ -1,19 +1,42 @@
 ---
-- name: Fetch operator-sdk
-  become: true
-  ansible.builtin.uri:
-    url: https://github.com/operator-framework/operator-sdk/releases/download/{{ operator_sdk_version }}/operator-sdk_linux_amd64
-    dest: /usr/local/bin/operator-sdk
-    mode: "755"
-    status_code:
-      - 200
-      - 304
+- name: Install OLM via rpm package
+  when: microshift_olm_package
+  block:
+    - name: Install OLM rpm
+      become: true
+      ansible.builtin.yum:
+        name: microshift-olm
+        state: present
+        enablerepo: microshift-rpms,microshift-deps-rpms
+      notify: Restart Microshift
 
-- name: Check if OLM is installed
-  ansible.builtin.command: /usr/local/bin/operator-sdk olm status
-  register: olm_status
-  failed_when: olm_status.rc not in [0, 1]
-  changed_when: true
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+- name: Install OLM via OperatorSDK
+  when: not microshift_olm_package
+  block:
+    - name: Fetch operator-sdk
+      become: true
+      ansible.builtin.uri:
+        url: https://github.com/operator-framework/operator-sdk/releases/download/{{ operator_sdk_version }}/operator-sdk_linux_amd64
+        dest: /usr/local/bin/operator-sdk
+        mode: "755"
+        status_code:
+          - 200
+          - 304
+
+    - name: Check if OLM is installed
+      ansible.builtin.command: /usr/local/bin/operator-sdk olm status
+      register: olm_status
+      failed_when: olm_status.rc not in [0, 1]
+      changed_when: true
+
+    - name: Install OLM with SDK
+      ansible.builtin.command: |
+        /usr/local/bin/operator-sdk olm install --version {{ olm_version }}
+      when: olm_status.rc != 0
+      changed_when: true
 
 # Set ns/user to SCC before we run the OLM installation
 - name: Ensure privileged SCC for OLM
@@ -24,9 +47,3 @@
     - "default"
     - "operatorhubio-catalog"
     - "olm-operator-serviceaccount"
-
-- name: Install OLM with SDK
-  ansible.builtin.command: |
-    /usr/local/bin/operator-sdk olm install --version {{ olm_version }}
-  when: olm_status.rc != 0
-  changed_when: true

@@ -39,10 +39,10 @@ firewalld_rules_permament: true
 use_copr_microshift: false
 
 # The Microshift version that is available in the repository.
-microshift_version: 4.14
+microshift_version: 4.15
 
 # Default settings from /etc/microshift/config.yaml.default
-# https://github.com/openshift/microshift/blob/release-4.14/packaging/microshift/config.yaml
+# https://github.com/openshift/microshift/blob/release-4.15/packaging/microshift/config.yaml
 microshift_config:
   apiServer:
     subjectAltNames:
@@ -72,7 +72,7 @@ microshift_config:
 #    nodeIP: ""
 
 # Default settings from /etc/microshift/lvmd.yaml.default
-# https://github.com/openshift/microshift/blob/release-4.14/packaging/microshift/lvmd.yaml
+# https://github.com/openshift/microshift/blob/release-4.15/packaging/microshift/lvmd.yaml
 microshift_lmvd:
 # socket-name: /run/lvmd/lvmd.socket
  device-classes:
@@ -86,7 +86,7 @@ microshift_lmvd:
 #       - ""
 
 # Default settings from /etc/microshift/ovn.yaml.default
-# https://github.com/openshift/microshift/blob/release-4.14/packaging/microshift/ovn.yaml
+# https://github.com/openshift/microshift/blob/release-4.15/packaging/microshift/ovn.yaml
 microshift_ovn: {}
 # mtu: 1500
 
@@ -96,7 +96,10 @@ microshift_ovn: {}
 
 # Install the OLM - https://olm.operatorframework.io/
 setup_olm: false
+# Install the OLM via microshift-olm rpm package.
+microshift_olm_package: false
 # https://github.com/operator-framework/operator-lifecycle-manager/releases
+# NOTE: the olm_version is not working when microshift_olm_package is set to true.
 olm_version: "v0.28.0"
 
 # Version of the Operator SDK
