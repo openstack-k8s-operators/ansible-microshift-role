@@ -57,13 +57,12 @@
     path: ~/.kube
     state: directory
     mode: "0755"
-
 - name: Copy kubeconfig
   become: true
   ansible.builtin.copy:
     src: /var/lib/microshift/resources/kubeadmin/kubeconfig
-    dest: "~{{ ansible_user }}/.kube/config"
+    dest: "{{ ansible_user_dir }}/.kube/config"
     remote_src: true
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
     mode: "0644"
