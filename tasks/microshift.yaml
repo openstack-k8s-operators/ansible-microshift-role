@@ -69,18 +69,18 @@
   become: true
   ansible.builtin.copy:
     src: /var/lib/microshift/resources/kubeadmin/kubeconfig
-    dest: "~{{ ansible_user }}/.kube/config-localhost"
+    dest: "{{ ansible_user_dir }}/.kube/config-localhost"
     remote_src: true
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
     mode: "0644"
 
 - name: "Copy kubeconfig for {{ fqdn }}"
   become: true
   ansible.builtin.copy:
     src: /var/lib/microshift/resources/kubeadmin/{{ fqdn }}/kubeconfig
-    dest: "~{{ ansible_user }}/.kube/config"
+    dest: "{{ ansible_user_dir }}/.kube/config"
     remote_src: true
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
     mode: "0644"
