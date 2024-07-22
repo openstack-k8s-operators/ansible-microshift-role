@@ -30,6 +30,20 @@
   notify: Restart Microshift
   when: not use_copr_microshift
 
+- name: Check if version file exists
+  become: true
+  ansible.builtin.stat:
+    path: /var/lib/microshift/version
+  register: _microshift_version_file
+
+- name: "Create a version file if does not exists with version {{ microshift_version }}.0"
+  become: true
+  when: not _microshift_version_file.stat.exists
+  ansible.builtin.copy:
+    content: |
+      {{ microshift_version }}.0
+    dest: /var/lib/microshift/version
+
 - name: Change Microshift configuration files
   become: true
   ansible.builtin.copy:
