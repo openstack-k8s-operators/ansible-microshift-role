@@ -30,6 +30,12 @@
   notify: Restart Microshift
   when: not use_copr_microshift
 
+- name: Ensure microshift lib dir exists
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/microshift
+    state: directory
+
 - name: Check if version file exists
   become: true
   ansible.builtin.stat:
