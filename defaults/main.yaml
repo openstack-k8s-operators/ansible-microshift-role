@@ -97,6 +97,8 @@ microshift_ovn: {}
 # Install the OLM - https://olm.operatorframework.io/
 setup_olm: false
 # https://github.com/operator-framework/operator-lifecycle-manager/releases
+# NOTE: the olm_version is not working when microshift_olm_package is set to true.
+microshift_olm_package: false
 olm_version: "v0.28.0"
 
 # Version of the Operator SDK
