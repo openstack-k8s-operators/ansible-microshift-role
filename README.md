@@ -118,7 +118,7 @@ We welcome contributions to this project! Here's how you can get started:
 * Commit your changes and push them to your forked repository.
 * Create a pull request to the main branch of this repository.
 
-The project mainteners would get a notification about your change and
+The project maintainers would get a notification about your change and
 you can expect, that soon your change would be reviewed!
 
 If you don't want to create a pull request with a feature, you can allways
