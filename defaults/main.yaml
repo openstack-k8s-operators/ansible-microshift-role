@@ -39,7 +39,7 @@ firewalld_rules_permament: true
 use_copr_microshift: false
 
 # The Microshift version that is available in the repository.
-microshift_version: 4.14
+microshift_version: 4.16
 
 # Default settings from /etc/microshift/config.yaml.default
 # https://github.com/openshift/microshift/blob/release-4.14/packaging/microshift/config.yaml
@@ -101,7 +101,7 @@ olm_version: "v0.28.0"
 
 # Version of the Operator SDK
 # https://github.com/operator-framework/operator-sdk/releases
-operator_sdk_version: "v1.34.2"
+operator_sdk_version: "v1.36.1"
 
 #######################################
 ###        Openshift Storage        ###
