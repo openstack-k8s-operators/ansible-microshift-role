@@ -17,6 +17,7 @@
 
 - name: Install CentOS NFV repository to enable Open vSwitch
   become: true
+  when: ansible_os_family != 'RedHat'
   ansible.builtin.yum:
     name: centos-release-nfv-openvswitch
     state: present
