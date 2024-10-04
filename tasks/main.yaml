@@ -1,22 +1,14 @@
 ---
-- name: Check if pull-secret is provided when copr version is disabled
+- name: Check if pull-secret is provided
   ansible.builtin.fail:
     msg: "You need to provide pull-secret.txt content into the var!"
-  when: not openshift_pull_secret and not use_copr_microshift
-
-- name: Disable selinux
-  ansible.builtin.include_tasks: selinux.yaml
-  when: disable_selinux
+  when: not openshift_pull_secret
 
 - name: Setup Microshift repository
   ansible.builtin.include_tasks: repo.yaml
 
 - name: Prepare host
   ansible.builtin.include_tasks: pre.yaml
-
-- name: Disable swap
-  ansible.builtin.include_tasks: swap.yaml
-  when: disable_swap
 
 - name: Setup tools
   ansible.builtin.include_tasks: tools.yaml
@@ -40,7 +32,6 @@
 
 - name: Provide credentials for restricted regitries
   ansible.builtin.include_tasks: registry_login.yaml
-  when: not use_copr_microshift
 
 - name: Verify that Microshift deployment is finished
   ansible.builtin.include_tasks: wait-for-microshift.yaml
