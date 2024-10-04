@@ -95,7 +95,6 @@ cat << EOF > deploy-microshift.yaml
 - hosts: microshift.dev
   vars:
     fqdn: microshift.dev
-    use_copr_microshift: false
   roles:
     - ansible-microshift-role
 EOF

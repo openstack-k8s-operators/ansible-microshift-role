@@ -1,20 +1,4 @@
 ---
-- name: Install microshift from Copr
-  when: use_copr_microshift
-  block:
-    - name: Enable copr repository
-      become: true
-      ansible.builtin.shell: |
-        dnf copr enable -y @redhat-et/microshift
-      changed_when: true
-
-    - name: Install microshift package
-      become: true
-      ansible.builtin.yum:
-        name: microshift
-        state: present
-      notify: Restart Microshift
-
 - name: Install CentOS NFV repository to enable Open vSwitch
   become: true
   when: ansible_os_family != 'RedHat'
@@ -29,7 +13,6 @@
     state: present
     enablerepo: microshift-rpms,microshift-deps-rpms
   notify: Restart Microshift
-  when: not use_copr_microshift
 
 - name: Ensure microshift lib dir exists
   become: true
