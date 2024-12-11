@@ -4,18 +4,25 @@
     msg: "You need to provide pull-secret.txt content into the var!"
   when: not openshift_pull_secret
 
-- name: Setup Microshift repository
-  ansible.builtin.include_tasks: repo.yaml
+- name: Configure required resources for non RHEL distro
+  when: ansible_distribution | lower != 'rhel'
+  block:
+    - name: Setup Microshift repository
+      ansible.builtin.include_tasks: repo.yaml
 
-- name: Prepare host
-  ansible.builtin.include_tasks: pre.yaml
+    - name: Prepare host
+      ansible.builtin.include_tasks: pre.yaml
 
-- name: Setup tools
-  ansible.builtin.include_tasks: tools.yaml
-  when: setup_tools
+    - name: Setup tools
+      ansible.builtin.include_tasks: tools.yaml
+      when: setup_tools
 
-- name: Prepare cri-o
-  ansible.builtin.include_tasks: crio.yaml
+    - name: Prepare cri-o
+      ansible.builtin.include_tasks: crio.yaml
+
+- name: Configure RHEL subscription
+  when: ansible_distribution | lower == 'rhel'
+  ansible.builtin.include_tasks: subscription.yaml
 
 - name: Prepare firewall
   ansible.builtin.include_tasks: firewall.yaml
@@ -29,6 +36,9 @@
 
 - name: Setup Microshift
   ansible.builtin.include_tasks: microshift.yaml
+
+- name: Post setup Microshift steps
+  ansible.builtin.include_tasks: post.yaml
 
 - name: Provide credentials for restricted regitries
   ansible.builtin.include_tasks: registry_login.yaml

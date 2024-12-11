@@ -1,19 +1,33 @@
 ---
-- name: Install CentOS NFV repository to enable Open vSwitch
-  become: true
-  when: ansible_os_family != 'RedHat'
-  ansible.builtin.yum:
-    name: centos-release-nfv-openvswitch
-    state: present
+- name: Install Microshift when distro is not RHEL
+  when: ansible_distribution | lower != 'rhel'
+  block:
+    - name: Install CentOS NFV repository to enable Open vSwitch
+      become: true
+      ansible.builtin.yum:
+        name: centos-release-nfv-openvswitch
+        state: present
 
-- name: Install microshift package
+    - name: Install microshift package
+      become: true
+      ansible.builtin.yum:
+        name: microshift
+        state: present
+        enablerepo: microshift-rpms,microshift-deps-rpms
+      notify: Restart Microshift
+
+- name: Install Microshift when distro is RHEL
+  when: ansible_distribution | lower == 'rhel'
   become: true
   ansible.builtin.yum:
     name: microshift
     state: present
-    enablerepo: microshift-rpms,microshift-deps-rpms
   notify: Restart Microshift
 
+###############################################################################
+# NOTE: A workaround for upgrading Microshift 4.13 to 4.14 or 4.14 to 4.15.   #
+# That would be removed in the future.                                        #
+###############################################################################
 - name: Ensure microshift lib dir exists
   become: true
   ansible.builtin.file:
@@ -33,6 +47,7 @@
     content: |
       {{ microshift_version }}.0
     dest: /var/lib/microshift/version
+###############################################################################
 
 - name: Change Microshift configuration files
   become: true
@@ -54,37 +69,3 @@
 
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
-
-- name: Wait for kubeconfig file after deploying Microshift
-  become: true
-  ansible.builtin.wait_for:
-    path: /var/lib/microshift/resources/kubeadmin/{{ fqdn }}/kubeconfig
-    search_regex: microshift
-    delay: 5
-    timeout: 300
-
-- name: Create kube config directory
-  ansible.builtin.file:
-    path: ~/.kube
-    state: directory
-    mode: "0755"
-
-- name: Copy kubeconfig for localhost
-  become: true
-  ansible.builtin.copy:
-    src: /var/lib/microshift/resources/kubeadmin/kubeconfig
-    dest: "{{ ansible_user_dir }}/.kube/config-localhost"
-    remote_src: true
-    owner: "{{ ansible_user_id }}"
-    group: "{{ ansible_user_id }}"
-    mode: "0644"
-
-- name: "Copy kubeconfig for {{ fqdn }}"
-  become: true
-  ansible.builtin.copy:
-    src: /var/lib/microshift/resources/kubeadmin/{{ fqdn }}/kubeconfig
-    dest: "{{ ansible_user_dir }}/.kube/config"
-    remote_src: true
-    owner: "{{ ansible_user_id }}"
-    group: "{{ ansible_user_id }}"
-    mode: "0644"

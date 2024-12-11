@@ -18,10 +18,18 @@
       loop_control:
         loop_var: zj_rule_details
 
-    - name: Add exception to source
+    - name: Add exception to source - 10.42.0.0
       become: true
       ansible.posix.firewalld:
         source: 10.42.0.0/16
+        zone: trusted
+        permanent: "{{ firewalld_rules_permament }}"
+        state: enabled
+
+    - name: Add exception to source - 169.254.169.251.1
+      become: true
+      ansible.posix.firewalld:
+        source: 169.254.169.1/32
         zone: trusted
         permanent: "{{ firewalld_rules_permament }}"
         state: enabled
