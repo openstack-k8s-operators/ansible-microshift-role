@@ -3,6 +3,10 @@
 ###       Basic configuration       ###
 #######################################
 
+# RHEL Version
+rhel_version_origin: "9.3"
+rhel_version_target: "9.4"
+
 # Set the Fully Qualified Domain Name of a Microshift host
 fqdn: microshift.dev
 

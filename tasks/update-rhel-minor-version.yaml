@@ -1,0 +1,27 @@
+---
+# Thess tasks upgrades the RHEL OS to the target minor version set by
+# the variable rhel_version_target
+- name: Upgrade all packages before update
+  when: ansible_distribution_version == rhel_version_origin
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+
+- name: Set Sticky OS version
+  when: ansible_distribution_version == rhel_version_origin
+  ansible.builtin.command:
+    cmd: subscription-manager release --set {{ rhel_version_target }}
+
+- name: Update Facts
+  ansible.builtin.setup:
+
+- name: Upgrade all packages after repo update
+  when: ansible_distribution_version == rhel_version_target
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+
+- name: Reboot System
+  when: ansible_distribution_version == rhel_version_target
+  ansible.builtin.reboot:
+    reboot_timeout: 3600

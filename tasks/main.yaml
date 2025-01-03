@@ -20,9 +20,18 @@
     - name: Prepare cri-o
       ansible.builtin.include_tasks: crio.yaml
 
-- name: Configure RHEL subscription
+- name: Configure RHEL subscription and update to the latest minor version
+  block:
+
+    - name: Configure Subscription
+      ansible.builtin.include_tasks: subscription.yaml
+
+    - name: Update RHEL OS minor version
+      when:
+        - ansible_distribution_version != rhel_version_target
+      ansible.builtin.include_tasks: update-rhel-minor-version.yaml
+
   when: ansible_distribution | lower == 'redhat'
-  ansible.builtin.include_tasks: subscription.yaml
 
 - name: Prepare firewall
   ansible.builtin.include_tasks: firewall.yaml
