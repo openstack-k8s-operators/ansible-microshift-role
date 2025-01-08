@@ -10,6 +10,10 @@ fqdn: microshift.dev
 # It can be generated here: https://cloud.redhat.com/openshift/create/local
 openshift_pull_secret: ""
 
+# Enable RHOCP subscription repo to install MicroShift rpm packages
+# on RHEL systems
+enable_rhocp_subscription: true
+
 # Set the location, where the pull-secret.txt content will be stored,
 # Later it will be used by cri-o runtime environment.
 registry_secret_path: /etc/crio/openshift-pull-secret
