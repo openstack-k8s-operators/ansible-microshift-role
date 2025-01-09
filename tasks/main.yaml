@@ -5,7 +5,7 @@
   when: not openshift_pull_secret
 
 - name: Configure required resources for non RHEL distro
-  when: ansible_distribution | lower != 'redhat'
+  when: ansible_distribution | lower != 'redhat' or not enable_rhocp_subscription
   block:
     - name: Setup Microshift repository
       ansible.builtin.include_tasks: repo.yaml
