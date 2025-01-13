@@ -71,7 +71,7 @@ microshift_lmvd:
    - name: default
      volume-group: rhel
      default: true
-#     spare-gb: 0
+     spare-gb: 0
 #     stripe: ""
 #     stripe-size: ""
 #     lvcreate-options:
