@@ -65,6 +65,13 @@ microshift_config:
 
 # Default settings from /etc/microshift/lvmd.yaml.default
 # https://github.com/openshift/microshift/blob/release-4.14/packaging/microshift/lvmd.yaml
+# NOTE: When the volume group size is too small, setting spare-gb to 0 can
+# avoid to have scheduling errors, such as:
+#
+#     0/1 nodes are available: 1 node(s) did not have enough free storage.
+#
+# To avoid causing issue with dynamic volume provisioning due to insufficient
+# disk space, set spare-gb to 0.
 microshift_lmvd:
 # socket-name: /run/lvmd/lvmd.socket
  device-classes:
