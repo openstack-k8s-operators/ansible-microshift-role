@@ -54,6 +54,14 @@
       ansible.builtin.set_fact:
         microshift_frontend_address: "{{ _lb_ip.stdout }}"
 
+- name: Set DNS nameservers provided by cloud provider
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
+    line: "server={{ item }}"
+    create: true
+  loop: "{{ ansible_dns.nameservers }}"
+
 - name: Change DNSMasq configuration file in NetworkManager
   become: true
   ansible.builtin.lineinfile:
@@ -61,13 +69,11 @@
     line: "{{ item }}"
     create: true
   loop:
-    - "server={{ (cloudprovider_dns | random if cloudprovider_dns else public_dns | random) }}"
-    - "server={{ public_dns | random }}"
     - "listen-address={{ ansible_default_ipv4.address }}"
     - "bind-interfaces"
     - "addn-hosts=/etc/hosts"
 
-- name: Add new addresses to bind to the ingress
+- name: "Add new addresses to bind to the ingress - {{ microshift_frontend_address }}"
   become: true
   ansible.builtin.lineinfile:
     path: /etc/NetworkManager/dnsmasq.d/dnsmasq.conf
@@ -90,11 +96,10 @@
 
 - name: Change default nameserver to host ip address
   become: true
-  ansible.builtin.lineinfile:
-    path: /etc/resolv.conf
-    insertbefore: '^nameserver'
-    line: 'nameserver {{ ansible_default_ipv4.address }}'
-    firstmatch: true
+  ansible.builtin.copy:
+    content: |
+      nameserver {{ ansible_default_ipv4.address }}
+    dest: /etc/resolv.conf
   notify: Restart Openshift DNS
 
 - name: Flush handlers
