@@ -22,38 +22,3 @@
     regexp: ".*{{ fqdn }}$"
     line: "{{ ansible_default_ipv4.address }} {{ fqdn }}"
     state: present
-
-# From Kubernetes setup - https://kubernetes.io/docs/setup/production-environment/container-runtimes/
-- name: Enable kernel modules
-  become: true
-  community.general.modprobe:
-    name: "{{ zj_modprobe }}"
-    state: present
-  loop:
-    - br_netfilter
-    - overlay
-  loop_control:
-    loop_var: zj_modprobe
-
-- name: Update sysctl
-  become: true
-  ansible.posix.sysctl:
-    name: "{{ zj_sysctl.name }}"
-    value: "{{ zj_sysctl.value }}"
-    sysctl_file: /etc/sysctl.d/10-k8s.conf
-    sysctl_set: true
-    state: present
-    reload: true
-  loop_control:
-    loop_var: zj_sysctl
-  loop:
-    - name: net.bridge.bridge-nf-call-ip6tables
-      value: 1
-    - name: net.bridge.bridge-nf-call-iptables
-      value: 1
-    - name: net.ipv4.ip_forward
-      value: 1
-    - name: net.ipv6.conf.all.disable_ipv6
-      value: 1
-    - name: net.ipv6.conf.default.disable_ipv6
-      value: 1

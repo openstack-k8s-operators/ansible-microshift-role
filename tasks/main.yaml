@@ -10,9 +10,6 @@
     - name: Setup Microshift repository
       ansible.builtin.include_tasks: repo.yaml
 
-    - name: Prepare host
-      ansible.builtin.include_tasks: pre.yaml
-
     - name: Setup tools
       ansible.builtin.include_tasks: tools.yaml
       when: setup_tools
@@ -23,6 +20,9 @@
 - name: Configure RHEL subscription
   when: ansible_distribution | lower == 'redhat' and enable_rhocp_subscription
   ansible.builtin.include_tasks: subscription.yaml
+
+- name: Prepare host
+  ansible.builtin.include_tasks: pre.yaml
 
 - name: Prepare firewall
   ansible.builtin.include_tasks: firewall.yaml
