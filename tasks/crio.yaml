@@ -9,14 +9,6 @@
     enablerepo: microshift-deps-rpms
   notify: Restart crio
 
-- name: Use only ipv4
-  become: true
-  ansible.builtin.copy:
-    src: crio-bridge.conf
-    dest: /etc/cni/net.d/100-crio-bridge.conf
-    mode: "0644"
-  notify: Restart crio
-
 - name: Apply container policy from crc
   become: true
   ansible.builtin.copy:
