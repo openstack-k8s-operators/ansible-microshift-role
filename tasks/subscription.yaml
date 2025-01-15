@@ -1,6 +1,9 @@
 ---
 # https://docs.redhat.com/en/documentation/red_hat_build_of_microshift/4.16/html/installing/microshift-install-rpm#installing-microshift-from-rpm-package_microshift-install-rpm
+# NOTE: drop enable_rhocp_subscription condition, when CentOS support
+# would be removed.
 - name: Enable RHOCP repso
+  when: enable_rhocp_subscription
   become: true
   community.general.rhsm_repository:
     name: "rhocp-4.16-for-rhel-9-{{ ansible_architecture }}-rpms"

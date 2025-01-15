@@ -154,3 +154,7 @@ etcd_on_ramdisk: false
 ramdisk_path: /var/lib/microshift/etcd
 # Ramdisk size for etcd service
 ramdisk_size: 512m
+
+# NOTE: Temporary workaround to install package that is not available on RHEL,
+# until the project supports CentOS and RHEL deployment.
+centos_rpm_nfv_direct_url: https://mirror.stream.centos.org/SIGs/9-stream/extras/x86_64/extras-common/Packages/c/centos-release-nfv-openvswitch-1-5.el9s.noarch.rpm

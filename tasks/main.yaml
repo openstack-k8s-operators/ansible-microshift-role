@@ -21,7 +21,7 @@
       ansible.builtin.include_tasks: crio.yaml
 
 - name: Configure RHEL subscription
-  when: ansible_distribution | lower == 'redhat' and enable_rhocp_subscription
+  when: ansible_distribution | lower == 'redhat'
   ansible.builtin.include_tasks: subscription.yaml
 
 - name: Prepare firewall
