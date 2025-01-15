@@ -131,27 +131,6 @@ vg_name: rhel
 ###              Others             ###
 #######################################
 
-# Configure the DNSMasq service to redirect service addresses to proper
-# ip address.
-configure_dnsmasq: true
-# Set the ip address of remote Microshift machine to configure local
-# DNSMasq service to redirect DNS queries for {{ fqdn }} domain
-# to the Microshift machine. If the value is empty, it will configure
-# first IP address of loadbalancer or Openshift Router.
-microshift_frontend_address: ""
-# Additional addresses that should be resolved by the DNSMasq and redirected
-# to microshift_frontend_address (if configure). Otherwise redirect to
-# loadbalancer or Openshift router.
-microshift_additional_addresses: []
-# Set the cloud provider DNS IP addresses. Replace below DNS servers with your
-# Cloud provider DNS addresses.
-cloudprovider_dns: []
-# Set the DNS ip addresses for public DNS.
-public_dns:
-  - 8.8.8.8
-  - 9.9.9.9
-  - 1.1.1.1
-
 # Set the cri-o registry policy to pull images even from untrasted registries.
 overwrite_container_policy: false
 
