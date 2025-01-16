@@ -1,53 +1,19 @@
 ---
-- name: Install Microshift when distro is not RHEL
-  when: ansible_distribution | lower != 'redhat' or not enable_rhocp_subscription
-  block:
-    - name: Install CentOS NFV repository to enable Open vSwitch
-      become: true
-      ansible.builtin.yum:
-        name: centos-release-nfv-openvswitch
-        state: present
-
-    - name: Install microshift package
-      become: true
-      ansible.builtin.yum:
-        name: microshift
-        state: present
-        enablerepo: microshift-rpms,microshift-deps-rpms
-      notify: Restart Microshift
-
-- name: Install Microshift when distro is RHEL
-  when: ansible_distribution | lower == 'redhat' and enable_rhocp_subscription
+- name: Install Microshift
   become: true
   ansible.builtin.yum:
     name: microshift
     state: present
-  notify: Restart Microshift
 
-###############################################################################
-# NOTE: A workaround for upgrading Microshift 4.13 to 4.14 or 4.14 to 4.15.   #
-# That would be removed in the future.                                        #
-###############################################################################
-- name: Ensure microshift lib dir exists
+- name: Copy pull-secret to node
   become: true
-  ansible.builtin.file:
-    path: /var/lib/microshift
-    state: directory
-
-- name: Check if version file exists
-  become: true
-  ansible.builtin.stat:
-    path: /var/lib/microshift/version
-  register: _microshift_version_file
-
-- name: "Create a version file if does not exists with version {{ microshift_version }}.0"
-  become: true
-  when: not _microshift_version_file.stat.exists
   ansible.builtin.copy:
-    content: |
-      {{ microshift_version }}.0
-    dest: /var/lib/microshift/version
-###############################################################################
+    content: "{{ openshift_pull_secret }}"
+    dest: "{{ registry_secret_path }}"
+    owner: root
+    group: root
+    mode: '0600'
+  no_log: "{{ hide_sensitive_logs }}"
 
 - name: Change Microshift configuration files
   become: true
@@ -63,9 +29,19 @@
       dest: config.yaml
     - var_name: microshift_lmvd
       dest: lvmd.yaml
-    - var_name: microshift_ovn
-      dest: ovn.yaml
   when: vars[item.var_name]
+  register: microshift_config
 
-- name: Flush handlers
-  ansible.builtin.meta: flush_handlers
+- name: Restart Microshift if config changed
+  become: true
+  ansible.builtin.systemd:
+    name: microshift
+    state: restarted
+  when: microshift_config is changed
+
+- name: Ensure Microshift started and enabled
+  become: true
+  ansible.builtin.systemd:
+    name: microshift
+    state: started
+    enabled: true

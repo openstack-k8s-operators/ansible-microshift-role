@@ -5,17 +5,12 @@
 The main goal of that project is to deploy the Microshift service by using
 Ansible tool.
 
-On top of the MicroShift [getting started](https://microshift.io/docs/getting-started/) instructions,
-this role performs the following actions:
+On top of the MicroShift [getting started](https://microshift.io/docs/getting-started/) instructions, this role performs the following actions deploy Microshift.
 
-* Disable IPv6 as it is a source of problem in cloud environment.
-* Give you possibility to disable the swap on the host.
-* Can install the Operator SDK framework.
-* Create the PV (Persistent Volumes) base on local storage.
-* Setup topolvm storage for persistent volume.
-* Create an additional user in OpenShift.
-* Overwrite the container policy.
-* Others.
+Optionally, the role allow to:
+* Create a 'rhel' LVM Volume group on a flat file
+* Deploy OLM
+* Setup DNSMasq to ensure that Pods can resolv domain to the MicroShift deployment
 
 ## Role requirements
 

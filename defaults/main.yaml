@@ -10,10 +10,6 @@ fqdn: microshift.dev
 # It can be generated here: https://cloud.redhat.com/openshift/create/local
 openshift_pull_secret: ""
 
-# Enable RHOCP subscription repo to install MicroShift rpm packages
-# on RHEL systems
-enable_rhocp_subscription: true
-
 # Set the location, where the pull-secret.txt content will be stored,
 # Later it will be used by cri-o runtime environment.
 registry_secret_path: /etc/crio/openshift-pull-secret
@@ -25,13 +21,7 @@ hide_sensitive_logs: true
 # For example `oc` binary.
 setup_tools: true
 
-# Keep the firewalld rules after reboot
-firewalld_rules_permament: true
-
 ### Microshift ###
-
-# The Microshift version that is available in the repository.
-microshift_version: 4.16
 
 # Default settings from /etc/microshift/config.yaml.default
 # https://github.com/openshift/microshift/blob/release-4.14/packaging/microshift/config.yaml
@@ -83,11 +73,6 @@ microshift_lmvd:
 #     stripe-size: ""
 #     lvcreate-options:
 #       - ""
-
-# Default settings from /etc/microshift/ovn.yaml.default
-# https://github.com/openshift/microshift/blob/release-4.14/packaging/microshift/ovn.yaml
-microshift_ovn: {}
-# mtu: 1500
 
 #######################################
 ###              OLM                ###
@@ -144,13 +129,9 @@ microshift_frontend_address: ""
 # loadbalancer or Openshift router.
 microshift_additional_addresses: []
 
-# Set the cri-o registry policy to pull images even from untrasted registries.
-overwrite_container_policy: false
-
-# Experimental features: you should not use it on the production!
+# Do not use it on the production!
 # That feature might be useful for the CI, especially when the disk is slow.
-etcd_on_ramdisk: false
-# Path for the etcd directory used by the microshift-etcd service.
-ramdisk_path: /var/lib/microshift/etcd
-# Ramdisk size for etcd service
+# This does not support host restart
+enable_ramdisk: false
+# Ramdisk size
 ramdisk_size: 512m

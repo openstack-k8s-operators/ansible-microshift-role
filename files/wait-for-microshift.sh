@@ -23,7 +23,7 @@ done
 # Normally, the script should finished in the for loop, but if it's not
 # it should exit with an error. Before that, describe all pods that
 # are not running correctly.
-echo -e "\nSomthing is not deployed in Microshift!\n"
+echo -e "\nSomething is not deployed in Microshift!\n"
 oc get pods --all-namespaces --no-headers | grep -Evi 'running|completed' | while read -r ns pod rest; do
     echo -e "\nChecking ${pod} in namespace ${ns}"
     kubectl -n "${ns}" describe pod "${pod}";
