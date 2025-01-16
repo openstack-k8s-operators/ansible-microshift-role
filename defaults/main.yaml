@@ -21,9 +21,6 @@ hide_sensitive_logs: true
 # For example `oc` binary.
 setup_tools: true
 
-# Keep the firewalld rules after reboot
-firewalld_rules_permament: true
-
 ### Microshift ###
 
 # The Microshift version that is available in the repository.
