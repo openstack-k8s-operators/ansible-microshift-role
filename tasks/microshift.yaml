@@ -1,6 +1,6 @@
 ---
 - name: Install Microshift when distro is not RHEL
-  when: ansible_distribution | lower != 'redhat' or not enable_rhocp_subscription
+  when: ansible_distribution | lower != 'redhat'
   block:
     - name: Install CentOS NFV repository to enable Open vSwitch
       become: true
@@ -17,7 +17,7 @@
       notify: Restart Microshift
 
 - name: Install Microshift when distro is RHEL
-  when: ansible_distribution | lower == 'redhat' and enable_rhocp_subscription
+  when: ansible_distribution | lower == 'redhat'
   become: true
   ansible.builtin.yum:
     name: microshift
