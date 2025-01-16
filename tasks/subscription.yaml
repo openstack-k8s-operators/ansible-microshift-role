@@ -1,12 +1,12 @@
 ---
 # https://docs.redhat.com/en/documentation/red_hat_build_of_microshift/4.16/html/installing/microshift-install-rpm#installing-microshift-from-rpm-package_microshift-install-rpm
-- name: Enable RHOCP repso
+- name: Enable RHOCP repository
   become: true
   community.general.rhsm_repository:
     name: "rhocp-4.16-for-rhel-9-{{ ansible_architecture }}-rpms"
     state: enabled
 
-- name: Enable fast datapath
+- name: Enable fast datapath repository
   become: true
   community.general.rhsm_repository:
     name: "fast-datapath-for-rhel-9-{{ ansible_architecture }}-rpms"

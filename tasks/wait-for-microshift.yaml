@@ -1,15 +1,9 @@
 ---
-- name: Check if verify Microshift script exists
-  ansible.builtin.stat:
-    path: /tmp/wait-for-microshift.sh
-  register: _script_exists
-
 - name: Copy script to verify deployment
   ansible.builtin.copy:
     src: wait-for-microshift.sh
     dest: /tmp/wait-for-microshift.sh
     mode: "0755"
-  when: not _script_exists.stat.exists
 
 - name: Check if all containers are up and ready
   ansible.builtin.command: /tmp/wait-for-microshift.sh

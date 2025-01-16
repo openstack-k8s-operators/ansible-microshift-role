@@ -9,7 +9,7 @@
       become: true
       ansible.posix.firewalld:
         port: "{{ zj_rule_details }}"
-        permanent: "{{ firewalld_rules_permament }}"
+        permanent: true
         state: enabled
       loop:
         - 80/tcp
@@ -23,7 +23,7 @@
       ansible.posix.firewalld:
         source: 10.42.0.0/16
         zone: trusted
-        permanent: "{{ firewalld_rules_permament }}"
+        permanent: true
         state: enabled
 
     - name: Add exception to source - 169.254.169.251.1
@@ -31,5 +31,5 @@
       ansible.posix.firewalld:
         source: 169.254.169.1/32
         zone: trusted
-        permanent: "{{ firewalld_rules_permament }}"
+        permanent: true
         state: enabled

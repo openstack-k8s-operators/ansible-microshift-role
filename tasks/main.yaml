@@ -2,23 +2,15 @@
 - name: Check if pull-secret is provided
   ansible.builtin.fail:
     msg: "You need to provide pull-secret.txt content into the var!"
-  when: not openshift_pull_secret
+  when: openshift_pull_secret | length < 100
 
-- name: Configure required resources for non RHEL distro
-  when: ansible_distribution | lower != 'redhat' or not enable_rhocp_subscription
-  block:
-    - name: Setup Microshift repository
-      ansible.builtin.include_tasks: repo.yaml
-
-    - name: Setup tools
-      ansible.builtin.include_tasks: tools.yaml
-      when: setup_tools
-
-    - name: Prepare cri-o
-      ansible.builtin.include_tasks: crio.yaml
+- name: Check system version compatibility
+  ansible.builtin.fail:
+    msg: "The system is not compatible"
+  when: (ansible_distribution_version != '9.4') or
+        (ansible_distribution | lower != 'redhat')
 
 - name: Configure RHEL subscription
-  when: ansible_distribution | lower == 'redhat' and enable_rhocp_subscription
   ansible.builtin.include_tasks: subscription.yaml
 
 - name: Prepare host
@@ -27,9 +19,9 @@
 - name: Prepare firewall
   ansible.builtin.include_tasks: firewall.yaml
 
-- name: Use ramdisk for etcd service
-  ansible.builtin.include_tasks: etcd_ramdisk.yaml
-  when: etcd_on_ramdisk
+- name: Use ramdisk for /var/lib/microshift
+  ansible.builtin.include_tasks: ramdisk.yaml
+  when: ramdisk
 
 - name: Create VG and LVM for openshift-storage topolvm
   ansible.builtin.include_tasks: openshift-storage.yaml
@@ -39,9 +31,6 @@
 
 - name: Post setup Microshift steps
   ansible.builtin.include_tasks: post.yaml
-
-- name: Provide credentials for restricted regitries
-  ansible.builtin.include_tasks: registry_login.yaml
 
 - name: Verify that Microshift deployment is finished
   ansible.builtin.include_tasks: wait-for-microshift.yaml

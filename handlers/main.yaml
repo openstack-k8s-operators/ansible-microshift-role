@@ -13,20 +13,6 @@
     state: reloaded
     enabled: true
 
-- name: Restart crio
-  become: true
-  ansible.builtin.systemd:
-    name: crio
-    state: restarted
-    enabled: true
-
-- name: Restart Microshift
-  become: true
-  ansible.builtin.systemd:
-    name: microshift
-    state: started
-    enabled: true
-
 - name: Restart Openshift DNS
   ansible.builtin.shell: |
     kubectl -n openshift-dns rollout restart daemonsets dns-default

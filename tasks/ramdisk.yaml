@@ -1,8 +1,8 @@
 ---
-- name: Create directory for etcd
+- name: Create directory for /var/lib/microshift
   become: true
   ansible.builtin.file:
-    path: "{{ ramdisk_path }}"
+    path: /var/lib/microshift
     state: directory
     mode: 0700
     owner: root
@@ -12,7 +12,7 @@
   become: true
   ansible.posix.mount:
     src: tmpfs
-    name: "{{ ramdisk_path }}"
+    name: /var/lib/microshift
     fstype: tmpfs
     state: mounted
     opts: "defaults,size={{ ramdisk_size }}"
@@ -20,7 +20,7 @@
 - name: Set proper permissions after mount
   become: true
   ansible.builtin.file:
-    path: "{{ ramdisk_path }}"
+    path: /var/lib/microshift
     state: directory
     mode: 0700
     owner: root
@@ -28,4 +28,4 @@
 
 - name: Set proper SELinux context
   become: true
-  ansible.builtin.command: restorecon -F {{ ramdisk_path }}
+  ansible.builtin.command: restorecon -F /var/lib/microshift
