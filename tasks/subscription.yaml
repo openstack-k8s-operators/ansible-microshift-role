@@ -3,7 +3,7 @@
 - name: Enable RHOCP repso
   become: true
   community.general.rhsm_repository:
-    name: "rhocp-4.16-for-rhel-9-{{ ansible_architecture }}-rpms"
+    name: "rhocp-{{ microshift_version }}-for-rhel-9-{{ ansible_architecture }}-rpms"
     state: enabled
 
 - name: Enable fast datapath
