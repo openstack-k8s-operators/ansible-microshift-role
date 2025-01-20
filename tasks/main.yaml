@@ -7,8 +7,7 @@
 - name: Check system version compatibility
   ansible.builtin.fail:
     msg: "The system is not compatible"
-  when: (ansible_distribution_version != '9.4') or
-        (ansible_distribution | lower != 'redhat')
+  when: ansible_distribution | lower != 'redhat'
 
 - name: Configure RHEL subscription
   ansible.builtin.include_tasks: subscription.yaml
