@@ -21,7 +21,7 @@
 
 - name: Use ramdisk for /var/lib/microshift
   ansible.builtin.include_tasks: ramdisk.yaml
-  when: ramdisk
+  when: enable_ramdisk
 
 - name: Create VG and LVM for openshift-storage topolvm
   ansible.builtin.include_tasks: openshift-storage.yaml
