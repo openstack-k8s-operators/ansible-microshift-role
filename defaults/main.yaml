@@ -118,7 +118,7 @@ vg_name: rhel
 
 # Configure the DNSMasq service to redirect service addresses to proper
 # ip address.
-configure_dnsmasq: true
+configure_dnsmasq: false
 # Set the ip address of remote Microshift machine to configure local
 # DNSMasq service to redirect DNS queries for {{ fqdn }} domain
 # to the Microshift machine. If the value is empty, it will configure
