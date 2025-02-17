@@ -22,3 +22,10 @@
     regexp: ".*{{ fqdn }}$"
     line: "{{ ansible_default_ipv4.address }} {{ fqdn }}"
     state: present
+
+- name: Create script to get ingress ip address
+  become: true
+  ansible.builtin.copy:
+    src: recognize-iplb-ip-address.sh
+    dest: /usr/local/bin/recognize-iplb-ip-address.sh
+    mode: "0755"
