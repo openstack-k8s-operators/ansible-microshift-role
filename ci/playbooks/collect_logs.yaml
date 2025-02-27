@@ -1,0 +1,35 @@
+---
+- hosts: all
+  gather_facts: false
+  vars:
+    log_dir: "{{ ansible_user_dir }}/zuul-output/logs"
+  tasks:
+    - name: Create log dir
+      file:
+        path: "{{ log_dir }}"
+        state: directory
+        mode: 0755
+
+    - name: Collect pod logs
+      ansible.builtin.shell: |
+        oc get pods > all_pods.txt
+        oc get secrets > all_secrets.txt
+        oc get pv > all_pv.txt
+        oc get events > oc_events.txt
+        oc get routes > oc_routes.txt
+        mkdir pod
+        all_pods=$(oc get pods -o name)
+        for pod in $all_pods; do
+          echo $pod
+          oc logs $pod > ${pod}-logs.txt
+          oc get -o yaml $pod > ${pod}.yaml
+          oc describe $pod > ${pod}-describe.txt
+        done
+        oc get all --all-namespaces > all-resources.txt
+      args:
+        chdir: "{{ log_dir }}"
+      changed_when: true
+
+    - name: Copy files from {{ work_dir }} on node
+      include_role:
+        name: fetch-output

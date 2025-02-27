@@ -1,0 +1,45 @@
+---
+- hosts: controller
+  vars:
+    fqdn: microshift.dev
+    pv_storageclass: somestorage
+    setup_olm: true
+    pv_count:
+      start: 1
+      end: 12
+    overwrite_container_policy: true
+    delete_openshift_storage: true
+  tasks:
+    - name: Setup Microshift
+      block:
+        - name: Start Microshift deployment
+          include_role:
+            name: ansible-microshift-role
+
+        # NOTE: The topolvm requires additional volume and create a lvm
+        # on that volume. We don't use that for CI, so just skip it.
+        - name: Create script to verify deployment
+          copy:
+            content: |
+              for i in {1..20}; do
+                echo "Ensuring that containers are spawned... ${i}"
+                count=$(/usr/local/bin/oc get pods --all-namespaces | grep openshift | grep -viE 'topolvm|running' -c)
+                if [ "$count" -eq "0" ]; then
+                    echo "Microshift is deployed, we can continue..."
+                    break
+                else
+                    echo "The Microshift containers are not ready..."
+                    sleep 15
+                fi
+              done
+              echo "Skipping waiting for openshift-storage - topolvm"
+            dest: /tmp/check-microshift.sh
+            mode: "0755"
+
+        - name: Check if all containers are up and ready
+          shell: /tmp/check-microshift.sh
+      always:
+        - name: Remove sensitive data
+          include_role:
+            name: ansible-microshift-role
+            tasks_from: cleanup.yaml

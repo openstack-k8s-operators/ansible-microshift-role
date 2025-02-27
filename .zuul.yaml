@@ -1,0 +1,20 @@
+---
+# FIXME: find a way to provide pull-secret.txt secret to the CI
+# job and skip using base-microshift-openstack base job.
+- job:
+    name: test-ansible-microshift-role
+    parent: base-microshift-openstack
+    nodeset: centos-9-microshift-single-node
+    timeout: 10800
+    required-projects:
+      - opendev.org/zuul/zuul-jobs
+    run: ci/playbooks/deploy_microshift.yaml
+    post-run: ci/playbooks/collect_logs.yaml
+
+- project:
+    name: openstack-k8s-operators/ansible-microshift-role
+    github-check:
+      jobs:
+        - tox-linters
+        - markdownlint
+        - test-ansible-microshift-role
