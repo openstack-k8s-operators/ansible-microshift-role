@@ -1,10 +1,10 @@
 ---
-- name: Create directory for /var/lib/microshift
+- name: "Create directory for {{ etcd_path }}"
   become: true
   ansible.builtin.file:
-    path: /var/lib/microshift
+    path: "{{ etcd_path }}"
     state: directory
-    mode: 0700
+    mode: "0700"
     owner: root
     group: root
 
@@ -12,7 +12,7 @@
   become: true
   ansible.posix.mount:
     src: tmpfs
-    name: /var/lib/microshift
+    name: "{{ etcd_path }}"
     fstype: tmpfs
     state: mounted
     opts: "defaults,size={{ ramdisk_size }}"
@@ -20,12 +20,39 @@
 - name: Set proper permissions after mount
   become: true
   ansible.builtin.file:
-    path: /var/lib/microshift
+    path: "{{ etcd_path }}"
     state: directory
-    mode: 0700
+    mode: "0700"
     owner: root
     group: root
 
 - name: Set proper SELinux context
   become: true
-  ansible.builtin.command: restorecon -F /var/lib/microshift
+  ansible.builtin.command: |
+    restorecon -F {{ etcd_path }}
+  changed_when: false
+
+###############################################################################
+# NOTE: A workaround for upgrading Microshift 4.13 to 4.14 or 4.14 to 4.15.   #
+# That would be removed in the future.                                        #
+###############################################################################
+- name: Ensure microshift lib dir exists
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/microshift
+    state: directory
+
+- name: Check if version file exists
+  become: true
+  ansible.builtin.stat:
+    path: /var/lib/microshift/version
+  register: _microshift_version_file
+
+- name: "Create a version file if does not exists with version {{ microshift_version }}.0"
+  become: true
+  when: not _microshift_version_file.stat.exists
+  ansible.builtin.copy:
+    content: |
+      {{ microshift_version }}.0
+    dest: /var/lib/microshift/version
+###############################################################################

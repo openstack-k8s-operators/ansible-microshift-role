@@ -135,3 +135,4 @@ microshift_additional_addresses: []
 enable_ramdisk: false
 # Ramdisk size
 ramdisk_size: 512m
+etcd_path: /var/lib/microshift/etcd
