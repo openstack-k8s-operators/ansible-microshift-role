@@ -10,7 +10,6 @@
     name:
       - iproute-tc
       - git
-      - golang
       - python3-cryptography
       - lvm2
     state: present
