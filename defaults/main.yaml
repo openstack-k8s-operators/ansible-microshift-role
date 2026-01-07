@@ -3,6 +3,9 @@
 ###       Basic configuration       ###
 #######################################
 
+# Version of microshift to install. Since we use the RPM installation this version should be > 4.16
+microshift_version: 4.16
+
 # Set the Fully Qualified Domain Name of a Microshift host
 fqdn: microshift.dev
 
