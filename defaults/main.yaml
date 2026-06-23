@@ -6,6 +6,9 @@
 # Set the Fully Qualified Domain Name of a Microshift host
 fqdn: microshift.dev
 
+# Set MicroShift release / OCP version
+microshift_version: 4.18
+
 # NOTE: To deploy Microshift > 4.8, you should provide pull-secret.txt content.
 # It can be generated here: https://cloud.redhat.com/openshift/create/local
 openshift_pull_secret: ""
