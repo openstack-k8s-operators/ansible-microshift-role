@@ -42,3 +42,7 @@
 - name: Setup OLM
   ansible.builtin.include_tasks: olm.yaml
   when: setup_olm
+
+- name: Setup OpenShift Marketplace
+  ansible.builtin.include_tasks: marketplace.yaml
+  when: enable_openshift_marketplace
