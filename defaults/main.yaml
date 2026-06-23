@@ -110,6 +110,16 @@ disk_file_size: 20G
 vg_name: rhel
 
 #######################################
+###           Marketplace           ###
+#######################################
+
+# Enable the OpenShift marketplace (OperatorHub CatalogSource)
+enable_openshift_marketplace: false
+marketplace_catalog_name: redhat-marketplace
+marketplace_catalog_display_name: Red Hat Marketplace
+marketplace_catalog_image: registry.redhat.io/redhat/redhat-marketplace-index:v4.16
+
+#######################################
 ###              Others             ###
 #######################################
 

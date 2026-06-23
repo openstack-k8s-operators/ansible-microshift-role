@@ -1,0 +1,50 @@
+---
+- name: Create openshift-marketplace namespace
+  ansible.builtin.command: oc create namespace openshift-marketplace
+  register: ns_create
+  changed_when: "'already exists' not in ns_create.stderr"
+
+- name: Check if ISV Container signing key is in container policy
+  ansible.builtin.command: grep -q ISV-Container-signing-key /etc/containers/policy.json
+  register: isv_key_check
+  failed_when: false
+  changed_when: false
+
+- name: Add ISV Container signing key to registry.redhat.io container policy
+  become: true
+  ansible.builtin.shell: |
+    jq '(.transports.docker."registry.redhat.io"[0].keyPaths) += ["/etc/pki/rpm-gpg/ISV-Container-signing-key"]' \
+      /etc/containers/policy.json > /etc/containers/policy.json.tmp && \
+      mv /etc/containers/policy.json.tmp /etc/containers/policy.json
+  when: isv_key_check.rc != 0
+  changed_when: true
+
+- name: Deploy marketplace CatalogSource
+  ansible.builtin.command: oc apply -f -
+  args:
+    stdin: |
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: CatalogSource
+      metadata:
+        name: {{ marketplace_catalog_name }}
+        namespace: openshift-marketplace
+      spec:
+        displayName: {{ marketplace_catalog_display_name }}
+        image: {{ marketplace_catalog_image }}
+        publisher: Red Hat
+        sourceType: grpc
+        updateStrategy:
+          registryPoll:
+            interval: 60m
+  changed_when: true
+
+- name: Wait for marketplace CatalogSource to be ready
+  ansible.builtin.command: >
+    oc get catalogsource {{ marketplace_catalog_name }}
+    -n openshift-marketplace
+    -o jsonpath='{.status.connectionState.lastObservedState}'
+  register: catalog_state
+  until: catalog_state.stdout == "READY"
+  retries: 30
+  delay: 10
+  changed_when: false
