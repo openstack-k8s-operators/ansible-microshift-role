@@ -29,7 +29,7 @@
       dest: config.yaml
     - var_name: microshift_lmvd
       dest: lvmd.yaml
-  when: vars[item.var_name]
+  when: vars[item.var_name] is defined
   register: microshift_config
 
 - name: Restart Microshift if config changed
