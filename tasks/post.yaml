@@ -11,7 +11,7 @@
   ansible.builtin.file:
     path: ~/.kube
     state: directory
-    mode: "0755"
+    mode: "0700"
 
 - name: Copy kubeconfig for localhost
   become: true
@@ -21,7 +21,7 @@
     remote_src: true
     owner: "{{ ansible_user_id }}"
     group: "{{ ansible_user_id }}"
-    mode: "0644"
+    mode: "0600"
 
 - name: "Copy kubeconfig for {{ fqdn }}"
   become: true
@@ -31,4 +31,4 @@
     remote_src: true
     owner: "{{ ansible_user_id }}"
     group: "{{ ansible_user_id }}"
-    mode: "0644"
+    mode: "0600"
