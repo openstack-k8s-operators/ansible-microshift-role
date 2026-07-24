@@ -14,12 +14,11 @@
   changed_when: true
 
 # Set ns/user to SCC before we run the OLM installation
-- name: Ensure privileged SCC for OLM
+- name: Ensure anyuid SCC for OLM
   ansible.builtin.command:
-    oc adm policy add-scc-to-user privileged system:serviceaccount:olm:{{ item }}
+    oc adm policy add-scc-to-user anyuid system:serviceaccount:olm:{{ item }}
   changed_when: true
   loop:
-    - "default"
     - "operatorhubio-catalog"
     - "olm-operator-serviceaccount"
 
