@@ -1,12 +1,6 @@
 ---
-- name: Copy script to verify deployment
-  ansible.builtin.copy:
-    src: wait-for-microshift.sh
-    dest: /tmp/wait-for-microshift.sh
-    mode: "0755"
-
 - name: Check if all containers are up and ready
-  ansible.builtin.command: /tmp/wait-for-microshift.sh
+  ansible.builtin.script: wait-for-microshift.sh
   changed_when: true
   register: _microshift_svc_status
   ignore_errors: true
@@ -16,5 +10,5 @@
   when: _microshift_svc_status.rc == 1
 
 - name: Check once again if all containers are up
-  ansible.builtin.command: /tmp/wait-for-microshift.sh
+  ansible.builtin.script: wait-for-microshift.sh
   changed_when: true
