@@ -4,6 +4,21 @@
   register: ns_create
   changed_when: "'already exists' not in ns_create.stderr"
 
+- name: Label openshift-marketplace namespace for pod security
+  ansible.builtin.command: >
+    oc label namespace openshift-marketplace
+    pod-security.kubernetes.io/enforce=baseline
+    pod-security.kubernetes.io/audit=baseline
+    pod-security.kubernetes.io/warn=baseline
+    --overwrite
+  changed_when: true
+
+- name: Ensure privileged SCC for marketplace catalog
+  ansible.builtin.command: >
+    oc adm policy add-scc-to-user privileged
+    system:serviceaccount:openshift-marketplace:{{ marketplace_catalog_name }}
+  changed_when: true
+
 - name: Check if ISV Container signing key is in container policy
   ansible.builtin.command: grep -q ISV-Container-signing-key /etc/containers/policy.json
   register: isv_key_check

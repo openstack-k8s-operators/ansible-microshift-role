@@ -89,6 +89,7 @@ olm_version: "v0.28.0"
 # Version of the Operator SDK
 # https://github.com/operator-framework/operator-sdk/releases
 operator_sdk_version: "v1.36.1"
+operator_sdk_checksum: "sha256:25872268c422fb63a350d85741a1f26052c953c7e9654167b0e8dbd6dbfb6c1d"
 
 #######################################
 ###        Openshift Storage        ###
